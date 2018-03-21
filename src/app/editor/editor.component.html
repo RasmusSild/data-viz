@@ -1,0 +1,44 @@
+<div>
+
+  <mat-toolbar color="primary">
+    <span class="title">Editor</span>
+  </mat-toolbar>
+
+  <mat-card>
+    <mat-card-content>
+
+      <mat-form-field>
+        <textarea [(ngModel)]="dataValue" matInput placeholder="Enter your data" matTextareaAutosize matAutosizeMinRows="10"></textarea>
+      </mat-form-field>
+
+      <form class="example-form">
+
+        <mat-form-field class="example-full-width">
+          <input name="height" matInput [(ngModel)]="heightValue" placeholder="Height" value="400">
+        </mat-form-field>
+        <mat-form-field class="example-full-width">
+          <input name="width" matInput [(ngModel)]="widthValue" placeholder="Width" value="600">
+        </mat-form-field>
+
+      </form>
+      <button class="form_btn" mat-raised-button color="primary" (click)="saveData()">Draw</button>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="error">
+    <mat-card-content>
+      <p>{{error}}</p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="!error && options">
+    <mat-card-content>
+      <app-line-chart [options]="options"></app-line-chart>
+    </mat-card-content>
+  </mat-card>
+
+</div>
+
+
+
