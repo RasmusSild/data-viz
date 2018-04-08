@@ -1,13 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
-@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
 
 body {
   margin: 0;
   font-family: Roboto, sans-serif;
 }
 
-mat-card {
-  max-width: 80%;
-  margin: 2em auto;
-  /*text-align: center;*/
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
 }
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+

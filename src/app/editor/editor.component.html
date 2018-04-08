@@ -1,4 +1,64 @@
-<div>
+<div class="row">
+  <div class="col-xs"></div>
+  <div class="col-xs-6">
+    <form>
+      <section class="form-block">
+        <label>Generate Chart</label>
+        <div class="form-group">
+          <label for="provider_select">Choose data provider</label>
+          <div class="select">
+            <select id="provider_select" #providerSelect (change)="changeDataProvider(providerSelect.value)">
+              <option value="manual" selected>Paste data manually</option>
+              <option value="file">Upload file</option>'
+            </select>
+          </div>
+        </div>
+        <div class="form-group" *ngIf="dataProvider === 'manual'">
+          <label for="manualdata">Enter data</label>
+          <textarea name="manuel" id="manualdata" [(ngModel)]="dataValue" rows="5"></textarea>
+        </div>
+        <div class="form-group" *ngIf="dataProvider === 'file'">
+          <label for="upload">Upload data</label>
+          <input type="file" id="upload" (change)="fileChanged($event)"/>
+          <button [disabled]="!file" (click)="uploadFile()" class="btn btn-primary btn-sm">Upload</button>
+        </div>
+        <div class="form-group">
+          <label for="height">Height</label>
+          <input type="number" name="height" [(ngModel)]="heightValue" id="height" placeholder="Enter height" size="12">
+        </div>
+        <div class="form-group">
+          <label for="width">Width</label>
+          <input type="number" name="width" [(ngModel)]="widthValue" id="width" placeholder="Enter width" size="12">
+        </div>
+        <button type="submit" (click)="saveData()" class="btn btn-primary">Draw</button>
+      </section>
+      <section>
+        <div *ngIf="error">
+          <p>{{error}}</p>
+        </div>
+      </section>
+    </form>
+  </div>
+  <div class="col-xs"></div>
+</div>
+
+<div class="row" *ngIf="!error && options">
+  <div class="col-xs"></div>
+  <div class="col-xs-6">
+    <app-line-chart [options]="options"></app-line-chart>
+  </div>
+  <div class="col-xs"></div>
+</div>
+
+<div class="row">
+  <div class="col-xs"></div>
+  <div class="col-xs-6">
+    <app-graph></app-graph>
+  </div>
+  <div class="col-xs"></div>
+</div>
+
+<!--<div>
 
   <mat-toolbar color="primary">
     <span class="title">Editor</span>
@@ -38,7 +98,7 @@
     </mat-card-content>
   </mat-card>
 
-</div>
+</div>-->
 
 
 

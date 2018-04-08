@@ -7,8 +7,6 @@ import * as d3Axis from 'd3-axis';
 import * as d3Time from 'd3-time-format';
 import * as d3DSV from 'd3';
 
-import * as $ from 'jquery';
-
 @Component({
   selector: 'app-line-chart',
   template: `<svg id='chart' [attr.height.px]="options.height" [attr.width.px]="options.width"></svg>
@@ -35,8 +33,8 @@ export class LineChartComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    $('#tt').empty();
-    $('#chart').empty();
+    // $('#tt').empty();
+    // $('#chart').empty();
     this.drawChart();
   }
 
@@ -118,8 +116,8 @@ export class LineChartComponent implements OnInit, OnChanges {
       .attr('cx', (d: any) => this.x(d.x))
       .attr('cy', (d: any) =>  this.y(d.y))
       .attr('fill', 'black')
-      .attr('stroke', 'black')
-      .on('mouseover', function(d) {
+      .attr('stroke', 'black');
+      /*.on('mouseover', function(d) {
         $( '.tooltipchart' ).animate({
           opacity: 0.9,
         }, 200, function() {
@@ -133,7 +131,7 @@ export class LineChartComponent implements OnInit, OnChanges {
           opacity: 0,
         }, 500, function() {
         });
-      });
+      });*/
   }
 
 }
