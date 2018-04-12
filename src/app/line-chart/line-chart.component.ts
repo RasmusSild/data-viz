@@ -49,18 +49,18 @@ export class LineChartComponent implements OnInit, OnChanges {
   }
 
   parseData() {
-    const a = d3DSV.tsvParse(this.options.data);
-    this.columns = a.columns;
-    delete a.columns;
+    const parsed = d3DSV.tsvParse(this.options.data);
+    this.columns = parsed.columns;
+    delete parsed.columns;
     const parseTime = d3Time.timeParse('%e-%b-%y');
     this.formattedData = [];
-    a.forEach((d) => {
+    for (const d of parsed) {
       this.formattedData.push({
         'x': parseTime(d[this.columns[0]]),
         'y': parseFloat(d[this.columns[1]]),
         'tooltip': d[this.columns[1]]
       });
-    });
+    }
   }
 
   initSvg() {

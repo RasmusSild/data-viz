@@ -31,6 +31,8 @@
     "d3-fetch": "^1.1.0",
     "d3-scale-chromatic": "^1.2.0",
     "jsnetworkx": "^0.3.4",
+    "ngraph.centrality": "^0.3.0",
+    "ngraph.graph": "0.0.14",
     "npm": "^5.7.1",
     "rxjs": "^5.5.6",
     "zone.js": "^0.8.19"
@@ -41,7 +43,7 @@
     "@angular/language-service": "^5.2.0",
     "@types/jasmine": "~2.8.3",
     "@types/jasminewd2": "~2.0.2",
-    "@types/node": "~6.0.60",
+    "@types/node": "^6.0.105",
     "codelyzer": "^4.0.1",
     "jasmine-core": "~2.8.0",
     "jasmine-spec-reporter": "~4.2.1",

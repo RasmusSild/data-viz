@@ -1,15 +1,31 @@
+<clr-alert *ngIf="fileSuccess" [clrAlertType]="'alert-success'" [clrAlertAppLevel]="fileSuccess">
+  <clr-alert-item>
+        <span class="alert-text">
+            Upload successful!
+        </span>
+  </clr-alert-item>
+</clr-alert>
+
+<clr-alert *ngIf="fileError" [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="fileError">
+  <clr-alert-item>
+        <span class="alert-text">
+            Error reading file!
+        </span>
+  </clr-alert-item>
+</clr-alert>
+
 <div class="row">
   <div class="col-xs"></div>
   <div class="col-xs-6">
     <form>
       <section class="form-block">
-        <label>Generate Chart</label>
+        <label>Generate Graph</label>
         <div class="form-group">
           <label for="provider_select">Choose data provider</label>
           <div class="select">
             <select id="provider_select" #providerSelect (change)="changeDataProvider(providerSelect.value)">
-              <option value="manual" selected>Paste data manually</option>
-              <option value="file">Upload file</option>'
+              <option value="manual">Paste data manually</option>
+              <option value="file" selected>Upload file</option>'
             </select>
           </div>
         </div>
@@ -22,14 +38,7 @@
           <input type="file" id="upload" (change)="fileChanged($event)"/>
           <button [disabled]="!file" (click)="uploadFile()" class="btn btn-primary btn-sm">Upload</button>
         </div>
-        <div class="form-group">
-          <label for="height">Height</label>
-          <input type="number" name="height" [(ngModel)]="heightValue" id="height" placeholder="Enter height" size="12">
-        </div>
-        <div class="form-group">
-          <label for="width">Width</label>
-          <input type="number" name="width" [(ngModel)]="widthValue" id="width" placeholder="Enter width" size="12">
-        </div>
+
         <button type="submit" (click)="saveData()" class="btn btn-primary">Draw</button>
       </section>
       <section>
@@ -42,6 +51,63 @@
   <div class="col-xs"></div>
 </div>
 
+<div class="row" *ngIf="options">
+  <div class="col-xs-9">
+    <app-graph [options]="options" (tableData)="receivedTableData($event)"></app-graph>
+  </div>
+  <div class="col-xs-3">
+    <button class="btn btn-primary"
+            [disabled]="mode === modes.Eigenvector"
+            (click)="changeVizMode(modes.Eigenvector)">
+      Eigenvector
+    </button>
+    <button class="btn btn-primary"
+            [disabled]="mode === modes.Betweenness"
+            (click)="changeVizMode(modes.Betweenness)">
+      Betweenness
+    </button>
+    <button class="btn btn-primary"
+            [disabled]="mode === modes.Closeness"
+            (click)="changeVizMode(modes.Closeness)">
+      Closeness
+    </button>
+    <button class="btn btn-primary"
+            [disabled]="mode === modes.Degree"
+            (click)="changeVizMode(modes.Degree)">
+      Degree
+    </button>
+    <div *ngIf="tableData">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th *ngIf="mode === modes.Eigenvector">EigenVector</th>
+          <th *ngIf="mode === modes.Betweenness">Betweenness</th>
+          <th *ngIf="mode === modes.Closeness">Closeness</th>
+          <th *ngIf="mode === modes.Degree">Degree</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let key of tableDataKeys">
+          <td>{{key}}</td>
+          <td>{{tableData[key]}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!--<div class="form-group">
+          <label for="height">Height</label>
+          <input type="number" name="height" [(ngModel)]="heightValue" id="height" placeholder="Enter height" size="12">
+        </div>
+        <div class="form-group">
+          <label for="width">Width</label>
+          <input type="number" name="width" [(ngModel)]="widthValue" id="width" placeholder="Enter width" size="12">
+        </div>-->
+
+<!--
 <div class="row" *ngIf="!error && options">
   <div class="col-xs"></div>
   <div class="col-xs-6">
@@ -49,56 +115,7 @@
   </div>
   <div class="col-xs"></div>
 </div>
-
-<div class="row">
-  <div class="col-xs"></div>
-  <div class="col-xs-6">
-    <app-graph></app-graph>
-  </div>
-  <div class="col-xs"></div>
-</div>
-
-<!--<div>
-
-  <mat-toolbar color="primary">
-    <span class="title">Editor</span>
-  </mat-toolbar>
-
-  <mat-card>
-    <mat-card-content>
-
-      <mat-form-field>
-        <textarea [(ngModel)]="dataValue" matInput placeholder="Enter your data" matTextareaAutosize matAutosizeMinRows="10"></textarea>
-      </mat-form-field>
-
-      <form class="example-form">
-
-        <mat-form-field class="example-full-width">
-          <input name="height" matInput [(ngModel)]="heightValue" placeholder="Height" value="400">
-        </mat-form-field>
-        <mat-form-field class="example-full-width">
-          <input name="width" matInput [(ngModel)]="widthValue" placeholder="Width" value="600">
-        </mat-form-field>
-
-      </form>
-      <button class="form_btn" mat-raised-button color="primary" (click)="saveData()">Draw</button>
-
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card *ngIf="error">
-    <mat-card-content>
-      <p>{{error}}</p>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card *ngIf="!error && options">
-    <mat-card-content>
-      <app-line-chart [options]="options"></app-line-chart>
-    </mat-card-content>
-  </mat-card>
-
-</div>-->
+-->
 
 
 

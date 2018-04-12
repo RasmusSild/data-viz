@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { Mode } from '../global';
+import { GraphComponent } from '../graph/graph.component';
 
 @Component({
   selector: 'app-editor',
@@ -8,6 +10,7 @@ import { FormControl, Validators } from '@angular/forms';
 })
 export class EditorComponent implements OnInit {
 
+  @ViewChild(GraphComponent) graph: GraphComponent;
   data: any;
   dataType: any;
   dataValue: any;
@@ -15,8 +18,14 @@ export class EditorComponent implements OnInit {
   widthValue: 600;
   error: string;
   options: any;
-  dataProvider = 'manual';
+  dataProvider = 'file';
   file: File;
+  modes = Mode;
+  mode: Mode = Mode.Eigenvector;
+  tableData;
+  tableDataKeys;
+  fileError: boolean = false;
+  fileSuccess: boolean = false;
 
   constructor() { }
 
@@ -27,24 +36,38 @@ export class EditorComponent implements OnInit {
     this.dataProvider = value;
   }
 
+  receivedTableData(data) {
+    this.tableData = data;
+    this.tableDataKeys = Object.keys(data);
+  }
+
+  changeVizMode(mode: Mode) {
+    this.mode = mode;
+    this.graph.changeVizMode(mode);
+  }
+
   fileChanged(e) {
     this.file = e.target.files[0];
-    console.log(this.file.name);
   }
 
   uploadFile() {
     const fileReader = new FileReader();
+    fileReader.onerror = (e) => {
+      this.fileError = true;
+      this.fileSuccess = false;
+    };
     fileReader.onload = (e) => {
+      this.fileSuccess = true;
+      this.fileError = false;
       this.dataValue = fileReader.result;
     };
     fileReader.readAsText(this.file);
   }
 
   saveData() {
-    console.log(this.dataValue);
     this.error = null;
     if (!this.dataValue) {this.error = 'Missing or faulty data!'; return; }
-    if (!this.heightValue || !this.widthValue) {this.error = 'Wrong dimensions!'; return; }
+    // if (!this.heightValue || !this.widthValue) {this.error = 'Wrong dimensions!'; return; }
 
     this.options = {
       data: this.dataValue,
