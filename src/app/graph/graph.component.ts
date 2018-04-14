@@ -2,10 +2,8 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 import * as d3 from 'd3';
 import * as jsnx from 'jsnetworkx';
 declare var require: any;
-var centrality = require('ngraph.centrality');
-var ngraph = require('ngraph.graph');
-// import * as centrality from 'ngraph.centrality';
-// import * as ngr from 'ngraph.graph';
+let centrality = require('ngraph.centrality');
+let ngraph = require('ngraph.graph');
 import { Mode } from '../global';
 
 @Component({
@@ -19,10 +17,9 @@ export class GraphComponent implements OnInit, OnChanges {
   @Output() tableData = new EventEmitter();
   private simulation: any;
   private svg: any;
-  private nodes: any;
-  private edges: any;
+  private nodes: Array<any>;
+  private edges: Array<any>;
   private graph: any;
-  private ngraph: any;
   private nodesSvg;
   private edgesSvg;
   private eigenvector;
@@ -32,6 +29,7 @@ export class GraphComponent implements OnInit, OnChanges {
   private clustering;
   private colorScale;
   private sizeScale;
+  private containerGroup;
 
   constructor() {}
 
@@ -104,27 +102,27 @@ export class GraphComponent implements OnInit, OnChanges {
 
     if (mode === Mode.Eigenvector) {
       // this.sizeScale.domain(clExtent);
-      this.colorScale.domain([d3.min(evExtent), d3.mean(evExtent), d3.max(evExtent)]);
+      this.colorScale.domain([d3.min(evExtent), d3.mean(<any>evExtent), d3.max(evExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
         .attr('r', 7);
         // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]));
       this.tableData.emit(this.eigenvector._stringValues);
     } else if (mode === Mode.Betweenness) {
-      this.colorScale.domain([d3.min(bwExtent), d3.mean(bwExtent), d3.max(bwExtent)]);
+      this.colorScale.domain([d3.min(bwExtent), d3.mean(<any>bwExtent), d3.max(bwExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.betweenness._stringValues[d.id]))
         .attr('r', 7);
       this.tableData.emit(this.betweenness._stringValues);
     } else if (mode === Mode.Closeness) {
-      this.colorScale.domain([d3.min(cnExtent), d3.mean(cnExtent), d3.max(cnExtent)]);
+      this.colorScale.domain([d3.min(cnExtent), d3.mean(<any>cnExtent), d3.max(cnExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.closeness[d.id]))
         .attr('r', 7);
       this.tableData.emit(this.closeness);
     }
     else if (mode === Mode.Degree) {
-      this.colorScale.domain([d3.min(dgExtent), d3.mean(dgExtent), d3.max(dgExtent)]);
+      this.colorScale.domain([d3.min(dgExtent), d3.mean(<any>dgExtent), d3.max(dgExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.degree[d.id]))
         .attr('r', 7);
@@ -170,10 +168,10 @@ export class GraphComponent implements OnInit, OnChanges {
 
     this.colorScale = d3.scaleLinear()
       .domain([0, 0.5, 1])
-      .range(['blue', 'green', 'red']);
+      .range([<any>'blue', 'green', 'red']);
     this.sizeScale = d3.scaleLinear().domain([0, 1]).range([8, 20]);
     // this.sizeScale.domain(clExtent);
-    this.colorScale.domain([d3.min(evExtent), d3.mean(evExtent), d3.max(evExtent)]);
+    this.colorScale.domain([d3.min(evExtent), d3.mean(<any>evExtent), d3.max(evExtent)]);
 
     this.svg = d3.select('svg');
 
@@ -182,12 +180,14 @@ export class GraphComponent implements OnInit, OnChanges {
 
     this.simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id((d) => d['source']))
-      .force('charge', d3.forceManyBody().strength(-400))
+      .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 2, height / 2));
 
     if (this.graph) {
 
-      this.edgesSvg = this.svg.append('g')
+      this.containerGroup = this.svg.append('g');
+
+      this.edgesSvg = this.containerGroup.append('g')
         .selectAll('line')
         .data(this.edges)
         .enter().append('line')
@@ -195,7 +195,7 @@ export class GraphComponent implements OnInit, OnChanges {
         .attr('stroke-width', (d) => Math.sqrt(d['weight']))
         .attr('class', 'edge');
 
-      this.nodesSvg = this.svg.append('g')
+      this.nodesSvg = this.containerGroup.append('g')
         .attr('class', 'node')
         .selectAll('circle')
         .data(this.nodes)
@@ -203,6 +203,8 @@ export class GraphComponent implements OnInit, OnChanges {
         .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
         // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]))
         .attr('r', 7)
+        .call(d3.zoom)
+          .on("zoom", this.onZoom.bind(this))
         .call(d3.drag()
           .on('start', this.dragStarted.bind(this))
           .on('drag', this.dragged.bind(this))
@@ -251,6 +253,10 @@ export class GraphComponent implements OnInit, OnChanges {
     }
     d.fx = null;
     d.fy = null;
+  }
+
+  onZoom() {
+    this.containerGroup.attr('transform', d3.event.transform)
   }
 
 }

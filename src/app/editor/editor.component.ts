@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
 import { Mode } from '../global';
 import { GraphComponent } from '../graph/graph.component';
 
@@ -26,6 +25,9 @@ export class EditorComponent implements OnInit {
   tableDataKeys;
   fileError: boolean = false;
   fileSuccess: boolean = false;
+  centralityActive: boolean = true;
+  customiserActive: boolean = false;
+  uploaderVisible: boolean = true;
 
   constructor() { }
 
@@ -55,11 +57,13 @@ export class EditorComponent implements OnInit {
     fileReader.onerror = (e) => {
       this.fileError = true;
       this.fileSuccess = false;
+      setTimeout(() => { this.fileError = false; }, 3000);
     };
     fileReader.onload = (e) => {
       this.fileSuccess = true;
       this.fileError = false;
       this.dataValue = fileReader.result;
+      setTimeout(() => { this.fileSuccess = false; }, 3000);
     };
     fileReader.readAsText(this.file);
   }
@@ -75,6 +79,8 @@ export class EditorComponent implements OnInit {
       height: this.heightValue,
       width: this.widthValue
     };
+
+    this.uploaderVisible = false;
 
   }
 

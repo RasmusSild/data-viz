@@ -10,6 +10,8 @@ import { HomepageComponent } from './homepage/homepage.component';
 import { EditorComponent } from './editor/editor.component';
 import { LineChartComponent } from './line-chart/line-chart.component';
 import { GraphComponent } from './graph/graph.component';
+import { CustomiserComponent } from './customiser/customiser.component';
+import { HeaderComponent } from './header/header.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +19,9 @@ import { GraphComponent } from './graph/graph.component';
     HomepageComponent,
     EditorComponent,
     LineChartComponent,
-    GraphComponent
+    GraphComponent,
+    CustomiserComponent,
+    HeaderComponent
   ],
   imports: [
     BrowserModule,

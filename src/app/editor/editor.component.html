@@ -14,7 +14,7 @@
   </clr-alert-item>
 </clr-alert>
 
-<div class="row">
+<div class="row" *ngIf="uploaderVisible">
   <div class="col-xs"></div>
   <div class="col-xs-6">
     <form>
@@ -36,10 +36,11 @@
         <div class="form-group" *ngIf="dataProvider === 'file'">
           <label for="upload">Upload data</label>
           <input type="file" id="upload" (change)="fileChanged($event)"/>
-          <button [disabled]="!file" (click)="uploadFile()" class="btn btn-primary btn-sm">Upload</button>
         </div>
-
-        <button type="submit" (click)="saveData()" class="btn btn-primary">Draw</button>
+        <div class="form-group" *ngIf="dataProvider === 'file'">
+          <button [disabled]="!file" (click)="uploadFile()" class="btn btn-outline btn-sm">Upload</button>
+        </div>
+        <button type="submit" (click)="saveData()" class="btn btn-primary">Generate</button>
       </section>
       <section>
         <div *ngIf="error">
@@ -52,49 +53,69 @@
 </div>
 
 <div class="row" *ngIf="options">
-  <div class="col-xs-9">
+  <div class="col-xs-8" id="graph-container">
     <app-graph [options]="options" (tableData)="receivedTableData($event)"></app-graph>
   </div>
-  <div class="col-xs-3">
-    <button class="btn btn-primary"
-            [disabled]="mode === modes.Eigenvector"
-            (click)="changeVizMode(modes.Eigenvector)">
-      Eigenvector
-    </button>
-    <button class="btn btn-primary"
-            [disabled]="mode === modes.Betweenness"
-            (click)="changeVizMode(modes.Betweenness)">
-      Betweenness
-    </button>
-    <button class="btn btn-primary"
-            [disabled]="mode === modes.Closeness"
-            (click)="changeVizMode(modes.Closeness)">
-      Closeness
-    </button>
-    <button class="btn btn-primary"
-            [disabled]="mode === modes.Degree"
-            (click)="changeVizMode(modes.Degree)">
-      Degree
-    </button>
-    <div *ngIf="tableData">
-      <table class="table">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th *ngIf="mode === modes.Eigenvector">EigenVector</th>
-          <th *ngIf="mode === modes.Betweenness">Betweenness</th>
-          <th *ngIf="mode === modes.Closeness">Closeness</th>
-          <th *ngIf="mode === modes.Degree">Degree</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let key of tableDataKeys">
-          <td>{{key}}</td>
-          <td>{{tableData[key]}}</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="col-xs-4">
+    <clr-tabs>
+      <clr-tab>
+        <button clrTabLink>Centrality</button>
+        <ng-template [(clrIfActive)]="centralityActive">
+          <clr-tab-content>
+            <div class="btn-group btn-primary mt-20">
+              <button class="btn"
+                      [disabled]="mode === modes.Eigenvector"
+                      (click)="changeVizMode(modes.Eigenvector)">
+                Eigenvector
+              </button>
+              <button class="btn"
+                      [disabled]="mode === modes.Betweenness"
+                      (click)="changeVizMode(modes.Betweenness)">
+                Betweenness
+              </button>
+              <button class="btn"
+                      [disabled]="mode === modes.Closeness"
+                      (click)="changeVizMode(modes.Closeness)">
+                Closeness
+              </button>
+              <button class="btn"
+                      [disabled]="mode === modes.Degree"
+                      (click)="changeVizMode(modes.Degree)">
+                Degree
+              </button>
+            </div>
+            <div *ngIf="tableData">
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th *ngIf="mode === modes.Eigenvector">EigenVector</th>
+                  <th *ngIf="mode === modes.Betweenness">Betweenness</th>
+                  <th *ngIf="mode === modes.Closeness">Closeness</th>
+                  <th *ngIf="mode === modes.Degree">Degree</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let key of tableDataKeys">
+                  <td>{{key}}</td>
+                  <td>{{tableData[key]}}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </clr-tab-content>
+        </ng-template>
+      </clr-tab>
+
+      <clr-tab>
+        <button clrTabLink>Customise</button>
+        <ng-template [(clrIfActive)]="customiserActive">
+          <clr-tab-content>
+            <app-customiser></app-customiser>
+          </clr-tab-content>
+        </ng-template>
+      </clr-tab>
+    </clr-tabs>
   </div>
 </div>
 
