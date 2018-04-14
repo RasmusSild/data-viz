@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { ClarityModule } from '@clr/angular';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -12,6 +13,7 @@ import { LineChartComponent } from './line-chart/line-chart.component';
 import { GraphComponent } from './graph/graph.component';
 import { CustomiserComponent } from './customiser/customiser.component';
 import { HeaderComponent } from './header/header.component';
+import { ResizeService } from './resize.service';
 
 @NgModule({
   declarations: [
@@ -28,9 +30,10 @@ import { HeaderComponent } from './header/header.component';
     ClarityModule,
     AppRoutingModule,
     FormsModule,
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    ColorPickerModule
   ],
-  providers: [],
+  providers: [ResizeService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

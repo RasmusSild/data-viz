@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../global';
 import { GraphComponent } from '../graph/graph.component';
 
@@ -7,14 +7,14 @@ import { GraphComponent } from '../graph/graph.component';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css']
 })
-export class EditorComponent implements OnInit {
+export class EditorComponent implements OnInit, AfterViewInit {
 
   @ViewChild(GraphComponent) graph: GraphComponent;
   data: any;
-  dataType: any;
+  // dataType: any;
   dataValue: any;
-  heightValue: 400;
-  widthValue: 600;
+  // heightValue = 600;
+  // widthValue = 600;
   error: string;
   options: any;
   dataProvider = 'file';
@@ -23,15 +23,20 @@ export class EditorComponent implements OnInit {
   mode: Mode = Mode.Eigenvector;
   tableData;
   tableDataKeys;
-  fileError: boolean = false;
-  fileSuccess: boolean = false;
-  centralityActive: boolean = true;
-  customiserActive: boolean = false;
-  uploaderVisible: boolean = true;
+  fileError = false;
+  fileSuccess = false;
+  centralityActive = true;
+  customiserActive = false;
+  uploaderVisible = true;
+  graphStyle;
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit() {
+
   }
 
   changeDataProvider(value) {
@@ -41,6 +46,11 @@ export class EditorComponent implements OnInit {
   receivedTableData(data) {
     this.tableData = data;
     this.tableDataKeys = Object.keys(data);
+  }
+
+  receivedStyleObject(data) {
+    this.graph.applyStyleFromObject(data);
+    this.graphStyle = data;
   }
 
   changeVizMode(mode: Mode) {
@@ -73,14 +83,15 @@ export class EditorComponent implements OnInit {
     if (!this.dataValue) {this.error = 'Missing or faulty data!'; return; }
     // if (!this.heightValue || !this.widthValue) {this.error = 'Wrong dimensions!'; return; }
 
+    this.uploaderVisible = false;
+    if (this.fileSuccess === true) {this.fileSuccess = false; } // TODO wtf is going on????
+
     this.options = {
       data: this.dataValue,
-      dataType: this.file.name.split('.').pop(),
-      height: this.heightValue,
-      width: this.widthValue
+      dataType: this.file.name.split('.').pop()
+      // height: this.heightValue,
+      // width: this.widthValue
     };
-
-    this.uploaderVisible = false;
 
   }
 

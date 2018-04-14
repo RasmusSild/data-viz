@@ -1,17 +1,19 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Mode, getViewportDimensions } from '../global';
+import { Subscription } from 'rxjs/Subscription';
+import { ResizeService } from '../resize.service';
 import * as d3 from 'd3';
 import * as jsnx from 'jsnetworkx';
 declare var require: any;
-let centrality = require('ngraph.centrality');
-let ngraph = require('ngraph.graph');
-import { Mode } from '../global';
+const centrality = require('ngraph.centrality');
+const ngraph = require('ngraph.graph');
 
 @Component({
   selector: 'app-graph',
-  template: `<svg id='graph' height='600' width='960'></svg>`,
+  template: `<svg id='graph' height="1020" width="1280"></svg>`,
   styleUrls: ['./graph.component.css']
 })
-export class GraphComponent implements OnInit, OnChanges {
+export class GraphComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() options: any;
   @Output() tableData = new EventEmitter();
@@ -30,10 +32,21 @@ export class GraphComponent implements OnInit, OnChanges {
   private colorScale;
   private sizeScale;
   private containerGroup;
+  private resizeSubscription: Subscription;
+  private evExtent;
+  private bwExtent;
+  private cnExtent;
+  private dgExtent;
+  private mode = Mode.Eigenvector;
+  private nodeSize = 7;
 
-  constructor() {}
+  constructor(private resizeService: ResizeService) {}
 
   ngOnInit() {
+
+    this.resizeSubscription = this.resizeService.onResize$
+      .subscribe(() => this.resizeGraph());
+
     this.formatData();
     this.createGraph();
     this.drawGraph();
@@ -42,6 +55,12 @@ export class GraphComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     // this.svg.selectAll('*').remove();
     // this.drawGraph();
+  }
+
+  ngOnDestroy() {
+    if (this.resizeSubscription) {
+      this.resizeSubscription.unsubscribe();
+    }
   }
 
   formatData() {
@@ -94,38 +113,41 @@ export class GraphComponent implements OnInit, OnChanges {
   }
 
   changeVizMode(mode: Mode) {
-    const evExtent = d3.extent(d3.values(this.eigenvector._stringValues));
-    const bwExtent = d3.extent(d3.values(this.betweenness._stringValues));
-    const cnExtent = d3.extent(d3.values(this.closeness));
-    const dgExtent = d3.extent(d3.values(this.degree));
+    this.evExtent = d3.extent(d3.values(this.eigenvector._stringValues));
+    this.bwExtent = d3.extent(d3.values(this.betweenness._stringValues));
+    this.cnExtent = d3.extent(d3.values(this.closeness));
+    this.dgExtent = d3.extent(d3.values(this.degree));
     // const clExtent = d3.extent(d3.values(this.clustering._stringValues));
 
     if (mode === Mode.Eigenvector) {
+      this.mode = Mode.Eigenvector;
       // this.sizeScale.domain(clExtent);
-      this.colorScale.domain([d3.min(evExtent), d3.mean(<any>evExtent), d3.max(evExtent)]);
+      this.colorScale.domain([d3.min(this.evExtent), d3.mean(<any>this.evExtent), d3.max(this.evExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
-        .attr('r', 7);
+        .attr('r', this.nodeSize);
         // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]));
       this.tableData.emit(this.eigenvector._stringValues);
     } else if (mode === Mode.Betweenness) {
-      this.colorScale.domain([d3.min(bwExtent), d3.mean(<any>bwExtent), d3.max(bwExtent)]);
+      this.mode = Mode.Betweenness;
+      this.colorScale.domain([d3.min(this.bwExtent), d3.mean(<any>this.bwExtent), d3.max(this.bwExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.betweenness._stringValues[d.id]))
-        .attr('r', 7);
+        .attr('r', this.nodeSize);
       this.tableData.emit(this.betweenness._stringValues);
     } else if (mode === Mode.Closeness) {
-      this.colorScale.domain([d3.min(cnExtent), d3.mean(<any>cnExtent), d3.max(cnExtent)]);
+      this.mode = Mode.Closeness;
+      this.colorScale.domain([d3.min(this.cnExtent), d3.mean(<any>this.cnExtent), d3.max(this.cnExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.closeness[d.id]))
-        .attr('r', 7);
+        .attr('r', this.nodeSize);
       this.tableData.emit(this.closeness);
-    }
-    else if (mode === Mode.Degree) {
-      this.colorScale.domain([d3.min(dgExtent), d3.mean(<any>dgExtent), d3.max(dgExtent)]);
+    } else if (mode === Mode.Degree) {
+      this.mode = Mode.Degree;
+      this.colorScale.domain([d3.min(this.dgExtent), d3.mean(<any>this.dgExtent), d3.max(this.dgExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.degree[d.id]))
-        .attr('r', 7);
+        .attr('r', this.nodeSize);
       this.tableData.emit(this.degree);
     }
   }
@@ -136,7 +158,7 @@ export class GraphComponent implements OnInit, OnChanges {
     const nodeMap = this.nodes.map((d) => d.id);
     const edgeMap = this.edges.map((d) => [d.source.id, d.target.id]);
 
-    for (let node in nodeMap) {
+    for (const node in nodeMap) {
       if (nodeMap.hasOwnProperty(node)) {
         ng.addNode(node);
       }
@@ -153,7 +175,6 @@ export class GraphComponent implements OnInit, OnChanges {
 
     this.degree = centrality.degree(ng);
     this.closeness = centrality.closeness(ng);
-    // this.betweenness = centrality.betweenness(ng);
     this.betweenness = jsnx.betweennessCentrality(this.graph);
     this.eigenvector = jsnx.eigenvectorCentrality(this.graph);
 
@@ -163,17 +184,18 @@ export class GraphComponent implements OnInit, OnChanges {
 
   drawGraph() {
     const evExtent = d3.extent(d3.values(this.eigenvector._stringValues));
-    // const bwExtent = d3.extent(d3.values(this.betweenness._stringValues));
-    // const clExtent = d3.extent(d3.values(this.clustering._stringValues));
 
     this.colorScale = d3.scaleLinear()
       .domain([0, 0.5, 1])
-      .range([<any>'blue', 'green', 'red']);
+      .range([<any>'#0000ff', '#00ff00', '#ff0000']);
     this.sizeScale = d3.scaleLinear().domain([0, 1]).range([8, 20]);
     // this.sizeScale.domain(clExtent);
     this.colorScale.domain([d3.min(evExtent), d3.mean(<any>evExtent), d3.max(evExtent)]);
 
     this.svg = d3.select('svg');
+    const viewport = getViewportDimensions();
+    this.svg.attr('width', (viewport.width / 3) * 2);
+    this.svg.attr('height', viewport.height  - 60);
 
     const width = +this.svg.attr('width'),
     height = +this.svg.attr('height');
@@ -202,13 +224,14 @@ export class GraphComponent implements OnInit, OnChanges {
         .enter().append('circle')
         .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
         // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]))
-        .attr('r', 7)
-        .call(d3.zoom)
-          .on("zoom", this.onZoom.bind(this))
+        .attr('r', this.nodeSize)
         .call(d3.drag()
           .on('start', this.dragStarted.bind(this))
           .on('drag', this.dragged.bind(this))
           .on('end', this.dragEnded.bind(this)));
+
+      const zoom = d3.zoom().on('zoom', this.onZoom.bind(this));
+      zoom(this.svg);
 
       this.nodesSvg.append('title')
         .text((d) => d['id']);
@@ -221,6 +244,33 @@ export class GraphComponent implements OnInit, OnChanges {
         .links(this.edges);
 
     }
+  }
+
+  applyStyleFromObject(styleObject) {
+    this.colorScale
+      .range([<any>styleObject.minValueColor, styleObject.medValueColor, styleObject.maxValueColor]);
+
+    if (this.mode === Mode.Eigenvector) {
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]));
+    } else if (this.mode === Mode.Betweenness) {
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.betweenness._stringValues[d.id]));
+    } else if (this.mode === Mode.Closeness) {
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.closeness[d.id]));
+    } else if (this.mode === Mode.Degree) {
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.degree[d.id]));
+    }
+
+    this.nodeSize = styleObject.nodeSize;
+
+    this.nodesSvg
+      .attr('r', this.nodeSize);
+
+    this.edgesSvg
+      .attr('stroke', styleObject.edgeColor);
   }
 
   ticked() {
@@ -256,7 +306,18 @@ export class GraphComponent implements OnInit, OnChanges {
   }
 
   onZoom() {
-    this.containerGroup.attr('transform', d3.event.transform)
+    this.containerGroup.attr('transform', d3.event.transform);
+  }
+
+  resizeGraph() {
+    const viewport = getViewportDimensions();
+    this.svg.attr('width', (viewport.width / 3) * 2);
+    this.svg.attr('height', viewport.height  - 60);
+
+    const width = +this.svg.attr('width'),
+      height = +this.svg.attr('height');
+
+    this.simulation.force('center', d3.forceCenter(width / 2, height / 2));
   }
 
 }

@@ -20,7 +20,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    let url = "";
+    let url = '';
     this.router.events.forEach((event: NavigationEvent) => {
       if (event instanceof NavigationEnd) {
         url = event.url;

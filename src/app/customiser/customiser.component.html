@@ -1,3 +1,51 @@
-<p>
-  customiser works!
-</p>
+<div class="row">
+  <div class="col-xs-1"></div>
+  <div class="col-xs-10">
+    <form>
+      <section class="form-block">
+        <div class="form-group">
+          <label for="min_value">Color of minimum values:</label>
+          <input id="min_value"
+                 [(colorPicker)]="styleObject.minValueColor"
+                 [style.background]="styleObject.minValueColor"
+                 [cpPosition]="'bottom'"
+                 [cpPositionRelativeToArrow]="true"/>
+        </div>
+        <div class="form-group">
+          <label for="med_value">Color of median values:</label>
+          <input id="med_value"
+                 [(colorPicker)]="styleObject.medValueColor"
+                 [style.background]="styleObject.medValueColor"
+                 [cpPosition]="'bottom'"
+                 [cpPositionRelativeToArrow]="true"/>
+        </div>
+        <div class="form-group">
+          <label for="max_value">Color of maximum values:</label>
+          <input id="max_value"
+                 [(colorPicker)]="styleObject.maxValueColor"
+                 [style.background]="styleObject.maxValueColor"
+                 [cpPosition]="'bottom'"
+                 [cpPositionRelativeToArrow]="true"/>
+        </div>
+        <div class="form-group">
+          <label for="edge_color">Color of graph links:</label>
+          <input id="edge_color"
+                 [(colorPicker)]="styleObject.edgeColor"
+                 [style.background]="styleObject.edgeColor"
+                 [cpPosition]="'bottom'"
+                 [cpPositionRelativeToArrow]="true"/>
+        </div>
+        <div class="form-group">
+          <label class="required">Size of nodes:</label>
+          <input *ngIf="styleObject.nodeSize" id="node_size2" type="number" [(ngModel)]="styleObject.nodeSize" name="node_size"/>
+          <label *ngIf="!styleObject.nodeSize" for="node_size" aria-haspopup="true" role="tooltip" class="tooltip tooltip-validation invalid tooltip-sm">
+            <input id="node_size" type="number" [(ngModel)]="styleObject.nodeSize" name="node_size"/>
+            <span class="tooltip-content">This field cannot be empty!</span>
+          </label>
+        </div>
+        <button [disabled]="!styleObject.nodeSize" type="button" (click)="applyStyle($event)" class="btn btn-primary">Apply style</button>
+      </section>
+    </form>
+  </div>
+  <div class="col-xs-1"></div>
+</div>
