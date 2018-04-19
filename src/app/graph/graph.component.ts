@@ -47,6 +47,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     this.resizeSubscription = this.resizeService.onResize$
       .subscribe(() => this.resizeGraph());
 
+    console.log(this.options);
+
     this.formatData();
     this.createGraph();
     this.drawGraph();
@@ -64,48 +66,41 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   formatData() {
-    switch (this.options.dataType) {
-      case('csv'):
-        this.formatCSV();
-        break;
-      case('tsv'):
-        this.formatTSV();
-        break;
-      case('json'):
-        this.formatJSON();
+    if (this.options.dataType === 'csv' || this.options.dataType === 'tsv') {
+      this.formatDSV(this.options.dataType);
+    } else {
+      this.formatJSON();
     }
   }
 
-  formatCSV() {
-    const edgelist = d3.csvParse(this.options.data);
+  formatDSV(dataType) {
+    const edgelist = dataType === 'csv' ? d3.csvParse(this.options.data) : d3.tsvParse(this.options.data);
     const nodeHash = {};
     const nodes = [];
     const edges = [];
+    const root = this.options.rootNode;
+    const dest = this.options.destNode;
 
     edgelist.forEach((edge) => {
-      if (!nodeHash[edge.source]) {
-        nodeHash[edge.source] = {id: edge.source, label: edge.source};
-        nodes.push(nodeHash[edge.source]);
+      if (!nodeHash[edge[root]]) {
+        nodeHash[edge[root]] = {id: edge[root], label: edge[dest]};
+        nodes.push(nodeHash[edge[root]]);
       }
-      if (!nodeHash[edge.target]) {
-        nodeHash[edge.target] = {id: edge.target, label: edge.target};
-        nodes.push(nodeHash[edge.target]);
+      if (!nodeHash[edge[dest]]) {
+        nodeHash[edge[dest]] = {id: edge[dest], label: edge[dest]};
+        nodes.push(nodeHash[edge[dest]]);
       }
 
       edges.push({
-        id: nodeHash[edge.source].id + '-' + nodeHash[edge.target].id,
-        source: nodeHash[edge.source],
-        target: nodeHash[edge.target],
+        id: nodeHash[edge[root]].id + '-' + nodeHash[edge[dest]].id,
+        source: nodeHash[edge[root]],
+        target: nodeHash[edge[dest]],
         weight: edge.weight
       });
     });
 
     this.nodes = nodes;
     this.edges = edges;
-  }
-
-  formatTSV() {
-
   }
 
   formatJSON() {

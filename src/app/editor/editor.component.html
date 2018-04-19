@@ -14,12 +14,21 @@
   </clr-alert-item>
 </clr-alert>-->
 
-<div class="row" *ngIf="uploaderVisible">
-  <div class="col-xs-3"></div>
-  <div class="col-xs-6">
-    <form>
+<clr-wizard #wizard [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg" [clrWizardClosable]="false">
+  <clr-wizard-title>Steps to generate graph</clr-wizard-title>
+
+  <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
+  <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+  <clr-wizard-button [type]="'finish'">Finish</clr-wizard-button>
+
+  <clr-wizard-page (clrWizardPageCustomButton)="page1Handler($event)">
+    <ng-template clrPageButtons>
+      <clr-wizard-button [type]="'custom-next'">Next</clr-wizard-button>
+    </ng-template>
+    <ng-template clrPageTitle>Upload data</ng-template>
+    <form *ngIf="uploaderVisible">
       <section class="form-block">
-        <label>Generate Graph</label>
         <div class="form-group">
           <label for="provider_select">Choose data provider</label>
           <div class="select">
@@ -58,7 +67,7 @@
             </div>
           </clr-alert>
         </div>
-        <button type="submit" (click)="saveData()" class="btn btn-primary">Generate</button>
+        <!--<button type="submit" (click)="parseData()" class="btn btn-primary">Next</button>-->
       </section>
       <section>
         <div *ngIf="error">
@@ -66,6 +75,45 @@
         </div>
       </section>
     </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page (clrWizardPageCustomButton)="page2Handler($event)">
+    <ng-template clrPageButtons>
+      <clr-wizard-button [type]="'custom-previous'">Previous</clr-wizard-button>
+      <clr-wizard-button [type]="'custom-finish'">Finish</clr-wizard-button>
+    </ng-template>
+    <ng-template clrPageTitle>Initial setup</ng-template>
+    <form *ngIf="dataColumns">
+      <section class="form-block">
+        <div class="form-group">
+          <label for="root-select">Root nodes column:</label>
+          <div class="select">
+            <select id="root-select" [(ngModel)]="rootNodeValue" [ngModelOptions]="{standalone: true}">
+              <option *ngFor="let column of dataColumns" [selected]="column == dataColumns[0]" [attr.value]="column">{{column}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="dest-select">Destination nodes column:</label>
+          <div class="select">
+            <select id="dest-select" [(ngModel)]="destNodeValue" [ngModelOptions]="{standalone: true}">
+              <option *ngFor="let column of dataColumns" [selected]="column == dataColumns[1]" [attr.value]="column">{{column}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="checkbox">
+          <input type="checkbox" [(ngModel)]="showArrows" [ngModelOptions]="{standalone: true}" id="dirCheck">
+          <label for="dirCheck">Show direction arrows</label>
+        </div>
+      </section>
+    </form>
+  </clr-wizard-page>
+
+</clr-wizard>
+
+<div class="row">
+  <div class="col-xs-3"></div>
+  <div class="col-xs-6">
   </div>
   <div class="col-xs-3"></div>
 </div>

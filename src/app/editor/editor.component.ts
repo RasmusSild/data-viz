@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../global';
 import { GraphComponent } from '../graph/graph.component';
+import * as d3 from 'd3';
+import { ClrWizard } from '@clr/angular';
 
 @Component({
   selector: 'app-editor',
@@ -10,11 +12,9 @@ import { GraphComponent } from '../graph/graph.component';
 export class EditorComponent implements OnInit, AfterViewInit {
 
   @ViewChild(GraphComponent) graph: GraphComponent;
+  @ViewChild('wizard') wizard: ClrWizard;
   data: any;
-  // dataType: any;
   dataValue: any;
-  // heightValue = 600;
-  // widthValue = 600;
   error: string;
   options: any;
   dataProvider = 'file';
@@ -23,12 +23,17 @@ export class EditorComponent implements OnInit, AfterViewInit {
   mode: Mode = Mode.Eigenvector;
   tableData;
   tableDataKeys;
+  dataColumns;
   fileError = false;
   fileSuccess = false;
   centralityActive = true;
   customiserActive = false;
   uploaderVisible = true;
   graphStyle;
+  wizardOpen = true;
+  rootNodeValue;
+  destNodeValue;
+  showArrows: false;
 
   constructor() { }
 
@@ -78,21 +83,31 @@ export class EditorComponent implements OnInit, AfterViewInit {
     fileReader.readAsText(this.file);
   }
 
-  saveData() {
-    this.error = null;
-    if (!this.dataValue) {this.error = 'Missing or faulty data!'; return; }
-    // if (!this.heightValue || !this.widthValue) {this.error = 'Wrong dimensions!'; return; }
+  page1Handler(buttonType) {
+    if ('custom-next' === buttonType) {
+      if (!this.dataValue) {this.error = 'Missing or faulty data!'; return; }
+      this.dataColumns = d3.csvParse(this.dataValue).columns;
+      if (this.fileSuccess === true) {this.fileSuccess = false; }
+      this.wizard.next();
+    }
+  }
 
-    this.uploaderVisible = false;
-    if (this.fileSuccess === true) {this.fileSuccess = false; } // TODO wtf is going on????
-
-    this.options = {
-      data: this.dataValue,
-      dataType: this.file.name.split('.').pop()
-      // height: this.heightValue,
-      // width: this.widthValue
-    };
-
+  page2Handler(buttonType) {
+    if ('custom-previous' === buttonType) {
+      this.wizard.previous();
+    }
+    if ('custom-finish' === buttonType) {
+      this.error = null;
+      this.uploaderVisible = false;
+      this.wizard.finish();
+      this.options = {
+        data: this.dataValue,
+        dataType: this.file.name.split('.').pop(),
+        rootNode: this.rootNodeValue,
+        destNode: this.destNodeValue,
+        showArrows: this.showArrows
+      };
+    }
   }
 
 }
