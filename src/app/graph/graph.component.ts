@@ -3,6 +3,7 @@ import { Mode, getViewportDimensions } from '../global';
 import { Subscription } from 'rxjs/Subscription';
 import { ResizeService } from '../resize.service';
 import * as d3 from 'd3';
+import "d3-selection-multi";
 import * as jsnx from 'jsnetworkx';
 declare var require: any;
 const centrality = require('ngraph.centrality');
@@ -195,6 +196,23 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     const width = +this.svg.attr('width'),
     height = +this.svg.attr('height');
 
+    /*
+    this.svg.append('defs').append('marker')
+      .attrs({'id':'arrowhead',
+        'viewBox':'-0 -5 10 10',
+        'refX':13,
+        'refY':0,
+        'orient':'auto',
+        'markerWidth':5,
+        'markerHeight':5,
+        'xoverflow':'visible'})
+      .append('svg:path')
+      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+      .attr('fill', '#999')
+      .style('stroke','none');
+
+      */
+
     this.simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id((d) => d['source']))
       .force('charge', d3.forceManyBody().strength(-300))
@@ -211,6 +229,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         .attr('stroke', '#999')
         .attr('stroke-width', (d) => Math.sqrt(d['weight']))
         .attr('class', 'edge');
+        // .attr('marker-end','url(#arrowhead)');
 
       this.nodesSvg = this.containerGroup.append('g')
         .attr('class', 'node')
