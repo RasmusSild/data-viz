@@ -35,6 +35,14 @@
                  [cpPosition]="'bottom'"
                  [cpPositionRelativeToArrow]="true"/>
         </div>
+        <div class="form-group" *ngIf="graphOptions.showArrows === true">
+          <label for="arrow_color">Color of direction arrows:</label>
+          <input id="arrow_color"
+                 [(colorPicker)]="styleObject.arrowColor"
+                 [style.background]="styleObject.arrowColor"
+                 [cpPosition]="'bottom'"
+                 [cpPositionRelativeToArrow]="true"/>
+        </div>
         <div class="form-group">
           <label class="required">Size of nodes:</label>
           <input *ngIf="styleObject.nodeSize" id="node_size2" type="number" [(ngModel)]="styleObject.nodeSize"

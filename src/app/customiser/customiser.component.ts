@@ -12,10 +12,12 @@ export class CustomiserComponent implements OnInit {
     medValueColor : '#00ff00',
     maxValueColor : '#ff0000',
     edgeColor : '#999999',
+    arrowColor : '#999999',
     nodeSize : 7
   };
 
   @Input() inputStyleObj: any;
+  @Input() graphOptions: any;
   @Output() sendStyleObject = new EventEmitter();
 
   constructor() { }
@@ -27,6 +29,7 @@ export class CustomiserComponent implements OnInit {
         medValueColor : this.inputStyleObj.medValueColor,
         maxValueColor : this.inputStyleObj.maxValueColor,
         edgeColor : this.inputStyleObj.edgeColor,
+        arrowColor : this.inputStyleObj.arrowColor,
         nodeSize : this.inputStyleObj.nodeSize
       };
     }

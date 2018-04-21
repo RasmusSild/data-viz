@@ -34,6 +34,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
   rootNodeValue;
   destNodeValue;
   showArrows: false;
+  centralityTableData;
+  showCentralityTable = false;
 
   constructor() { }
 
@@ -44,12 +46,17 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   }
 
-  changeDataProvider(value) {
+  /*changeDataProvider(value) {
     this.dataProvider = value;
-  }
+  }*/
 
   receivedTableData(data) {
     this.tableData = data;
+    this.tableDataKeys = Object.keys(data);
+  }
+
+  receivedFullTableData(data) {
+    this.centralityTableData = data;
     this.tableDataKeys = Object.keys(data);
   }
 
@@ -72,11 +79,13 @@ export class EditorComponent implements OnInit, AfterViewInit {
     fileReader.onerror = (e) => {
       this.fileError = true;
       this.fileSuccess = false;
+      this.error = null;
       setTimeout(() => { this.fileError = false; }, 3000);
     };
     fileReader.onload = (e) => {
       this.fileSuccess = true;
       this.fileError = false;
+      this.error = null;
       this.dataValue = fileReader.result;
       setTimeout(() => { this.fileSuccess = false; }, 3000);
     };

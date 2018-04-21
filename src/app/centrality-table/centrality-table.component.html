@@ -1,0 +1,30 @@
+<clr-modal [(clrModalOpen)]="open" [clrModalSize]="'xl'" (clrModalOpenChange)="openChange($event)">
+  <h3 class="modal-title">Full centrality comparison</h3>
+  <div class="modal-body">
+    <div>
+      <table class="table data-table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>EigenVector</th>
+          <th>Betweenness</th>
+          <th>Closeness</th>
+          <th>Degree</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let entry of data">
+          <td>{{entry.id}}</td>
+          <td>{{entry.Eigenvector}}</td>
+          <td>{{entry.Betweenness}}</td>
+          <td>{{entry.Closeness}}</td>
+          <td>{{entry.Degree}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="close.emit()">Close</button>
+  </div>
+</clr-modal>

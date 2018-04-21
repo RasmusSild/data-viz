@@ -14,6 +14,7 @@ import { GraphComponent } from './graph/graph.component';
 import { CustomiserComponent } from './customiser/customiser.component';
 import { HeaderComponent } from './header/header.component';
 import { ResizeService } from './resize.service';
+import { CentralityTableComponent } from './centrality-table/centrality-table.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { ResizeService } from './resize.service';
     LineChartComponent,
     GraphComponent,
     CustomiserComponent,
-    HeaderComponent
+    HeaderComponent,
+    CentralityTableComponent
   ],
   imports: [
     BrowserModule,

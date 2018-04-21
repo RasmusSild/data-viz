@@ -1,19 +1,3 @@
-<!--<clr-alert *ngIf="fileSuccess" [clrAlertType]="'alert-success'" [clrAlertAppLevel]="true">
-  <clr-alert-item>
-        <span class="alert-text">
-            Upload successful!
-        </span>
-  </clr-alert-item>
-</clr-alert>
-
-<clr-alert *ngIf="fileError" [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true">
-  <clr-alert-item>
-        <span class="alert-text">
-            Error reading file!
-        </span>
-  </clr-alert-item>
-</clr-alert>-->
-
 <clr-wizard #wizard [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg" [clrWizardClosable]="false">
   <clr-wizard-title>Steps to generate graph</clr-wizard-title>
 
@@ -29,7 +13,7 @@
     <ng-template clrPageTitle>Upload data</ng-template>
     <form *ngIf="uploaderVisible">
       <section class="form-block">
-        <div class="form-group">
+        <!--<div class="form-group">
           <label for="provider_select">Choose data provider</label>
           <div class="select">
             <select id="provider_select" #providerSelect (change)="changeDataProvider(providerSelect.value)">
@@ -37,11 +21,11 @@
               <option value="file" selected>Upload file</option>'
             </select>
           </div>
-        </div>
-        <div class="form-group" *ngIf="dataProvider === 'manual'">
+        </div>-->
+        <!--<div class="form-group" *ngIf="dataProvider === 'manual'">
           <label for="manualdata">Enter data</label>
           <textarea name="manuel" id="manualdata" [(ngModel)]="dataValue" rows="5"></textarea>
-        </div>
+        </div>-->
         <div class="form-group" *ngIf="dataProvider === 'file'">
           <label for="upload">Upload data</label>
           <input type="file" id="upload" (change)="fileChanged($event)"/>
@@ -49,7 +33,11 @@
         <div class="form-group" *ngIf="dataProvider === 'file'">
           <button [disabled]="!file" (click)="uploadFile()" class="btn btn-outline btn-sm">Upload</button>
         </div>
-        <div class="form-group" *ngIf="fileSuccess">
+      </section>
+      <section>
+
+        <!--************ Error messages ************-->
+        <div *ngIf="fileSuccess">
           <clr-alert [clrAlertType]="'alert-success'">
             <div class="alert-item">
               <span class="alert-text">
@@ -58,7 +46,7 @@
             </div>
           </clr-alert>
         </div>
-        <div class="form-group" *ngIf="fileError">
+        <div *ngIf="fileError">
           <clr-alert [clrAlertType]="'alert-danger'">
             <div class="alert-item">
               <span class="alert-text">
@@ -67,13 +55,18 @@
             </div>
           </clr-alert>
         </div>
-        <!--<button type="submit" (click)="parseData()" class="btn btn-primary">Next</button>-->
-      </section>
-      <section>
         <div *ngIf="error">
-          <p>{{error}}</p>
+          <clr-alert [clrAlertType]="'alert-danger'">
+            <div class="alert-item">
+              <span class="alert-text">
+                  {{error}}
+              </span>
+            </div>
+          </clr-alert>
         </div>
       </section>
+      <!--*****************************************-->
+
     </form>
   </clr-wizard-page>
 
@@ -103,7 +96,7 @@
         </div>
         <div class="checkbox">
           <input type="checkbox" [(ngModel)]="showArrows" [ngModelOptions]="{standalone: true}" id="dirCheck">
-          <label for="dirCheck">Show direction arrows</label>
+          <label for="dirCheck">Directed graph</label>
         </div>
       </section>
     </form>
@@ -111,18 +104,11 @@
 
 </clr-wizard>
 
-<div class="row">
-  <div class="col-xs-3"></div>
-  <div class="col-xs-6">
+<div class="row" id="editor" *ngIf="options">
+  <div class="col-xs-8" id="graph-container">
+    <app-graph [options]="options" (tableData)="receivedTableData($event)" (sendFullTableData)="receivedFullTableData($event)"></app-graph>
   </div>
-  <div class="col-xs-3"></div>
-</div>
-
-<div class="row" id="editor">
-  <div class="col-xs-8" id="graph-container" *ngIf="options">
-    <app-graph [options]="options" (tableData)="receivedTableData($event)"></app-graph>
-  </div>
-  <div *ngIf="options" id="toolbar" class="col-xs-4 editor-toolbar">
+  <div id="toolbar" class="col-xs-4 editor-toolbar">
     <clr-tabs>
       <clr-tab>
         <button clrTabLink>Centrality</button>
@@ -150,7 +136,39 @@
                 Degree
               </button>
             </div>
+            <!--<div class="form-group">
+              <div class="toggle-switch">
+                <input type="checkbox" id="toggle_1"
+                       [checked]="mode === modes.Eigenvector"
+                       [disabled]="mode === modes.Eigenvector">
+                <label for="toggle_1">Eigenvector</label>
+              </div>
+              <div class="toggle-switch">
+                <input type="checkbox" id="toggle_2"
+                       [checked]="mode === modes.Betweenness"
+                       [disabled]="mode === modes.Betweenness">
+                <label for="toggle_2">Betweenness</label>
+              </div>
+              <div class="toggle-switch">
+                <input type="checkbox" id="toggle_3"
+                       [checked]="mode === modes.Closeness"
+                       [disabled]="mode === modes.Closeness">
+                <label for="toggle_3">Closeness</label>
+              </div>
+              <div class="toggle-switch">
+                <input type="checkbox" id="toggle_4"
+                       [checked]="mode === modes.Degree"
+                       [disabled]="mode === modes.Degree">
+                <label for="toggle_4">Degree</label>
+              </div>
+            </div>-->
             <div *ngIf="tableData">
+              <app-centrality-table (close)="showCentralityTable = false" [open]="showCentralityTable" [data]="centralityTableData"></app-centrality-table>
+              <button class="btn"
+                      [disabled]="!centralityTableData"
+                      (click)="showCentralityTable = true">
+                Show full table
+              </button>
               <table class="table data-table">
                 <thead>
                 <tr>
@@ -177,7 +195,7 @@
         <button clrTabLink>Customise</button>
         <ng-template [(clrIfActive)]="customiserActive">
           <clr-tab-content>
-            <app-customiser [inputStyleObj]="graphStyle" (sendStyleObject)="receivedStyleObject($event)"></app-customiser>
+            <app-customiser [inputStyleObj]="graphStyle" [graphOptions]="options" (sendStyleObject)="receivedStyleObject($event)"></app-customiser>
           </clr-tab-content>
         </ng-template>
       </clr-tab>

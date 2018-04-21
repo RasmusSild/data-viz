@@ -3,7 +3,7 @@ import { Mode, getViewportDimensions } from '../global';
 import { Subscription } from 'rxjs/Subscription';
 import { ResizeService } from '../resize.service';
 import * as d3 from 'd3';
-import "d3-selection-multi";
+import 'd3-selection-multi';
 import * as jsnx from 'jsnetworkx';
 declare var require: any;
 const centrality = require('ngraph.centrality');
@@ -11,13 +11,16 @@ const ngraph = require('ngraph.graph');
 
 @Component({
   selector: 'app-graph',
-  template: `<svg id='graph' height="1020" width="1280"></svg>`,
+  template: `<svg id='graph' height="1020" width="1280"></svg>
+            <div class='tooltip'></div>`,
   styleUrls: ['./graph.component.css']
 })
 export class GraphComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() options: any;
   @Output() tableData = new EventEmitter();
+  @Output() sendFullTableData = new EventEmitter();
+  private fullTableData = [];
   private simulation: any;
   private svg: any;
   private nodes: Array<any>;
@@ -40,6 +43,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   private dgExtent;
   private mode = Mode.Eigenvector;
   private nodeSize = 7;
+  private defs;
+  private tooltipDiv;
+  private tooltipDisabled = false;
 
   constructor(private resizeService: ResizeService) {}
 
@@ -47,8 +53,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.resizeSubscription = this.resizeService.onResize$
       .subscribe(() => this.resizeGraph());
-
-    console.log(this.options);
 
     this.formatData();
     this.createGraph();
@@ -105,7 +109,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   formatJSON() {
-
+    console.log(JSON.parse(this.options.data));
   }
 
   changeVizMode(mode: Mode) {
@@ -174,8 +178,19 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     this.betweenness = jsnx.betweennessCentrality(this.graph);
     this.eigenvector = jsnx.eigenvectorCentrality(this.graph);
 
+    for (const key in this.eigenvector._stringValues) {
+        this.fullTableData.push({
+          id: key,
+          Eigenvector: this.eigenvector._stringValues[key],
+          Betweenness: this.betweenness._stringValues[key],
+          Closeness: this.closeness[key],
+          Degree: this.degree[key]
+        });
+    }
+
     this.clustering = jsnx.clustering(this.graph);
     this.tableData.emit(this.eigenvector._stringValues);
+    this.sendFullTableData.emit(this.fullTableData);
   }
 
   drawGraph() {
@@ -196,22 +211,24 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     const width = +this.svg.attr('width'),
     height = +this.svg.attr('height');
 
-    /*
-    this.svg.append('defs').append('marker')
-      .attrs({'id':'arrowhead',
-        'viewBox':'-0 -5 10 10',
-        'refX':13,
-        'refY':0,
-        'orient':'auto',
-        'markerWidth':5,
-        'markerHeight':5,
-        'xoverflow':'visible'})
-      .append('svg:path')
-      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-      .attr('fill', '#999')
-      .style('stroke','none');
+    this.tooltipDiv = d3.select('.tooltip');
 
-      */
+    if (this.options.showArrows === true) {
+      this.defs = this.svg.append('defs').append('marker')
+        .attrs({
+          'id': 'arrowhead',
+          'viewBox': '-0 -5 10 10',
+          'refX': 13,
+          'refY': 0,
+          'orient': 'auto',
+          'markerWidth' : 5,
+          'markerHeight': 5,
+          'xoverflow': 'visible'})
+        .append('svg:path')
+        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('fill', '#999')
+        .style('stroke', 'none');
+    }
 
     this.simulation = d3.forceSimulation()
       .force('link', d3.forceLink().id((d) => d['source']))
@@ -229,7 +246,10 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         .attr('stroke', '#999')
         .attr('stroke-width', (d) => Math.sqrt(d['weight']))
         .attr('class', 'edge');
-        // .attr('marker-end','url(#arrowhead)');
+
+      if (this.options.showArrows === true) {
+        this.edgesSvg.attr('marker-end', 'url(#arrowhead)');
+      }
 
       this.nodesSvg = this.containerGroup.append('g')
         .attr('class', 'node')
@@ -239,6 +259,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
         // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]))
         .attr('r', this.nodeSize)
+        .on('mouseover', this.tooltipMouseOver.bind(this))
+        .on('mouseout', this.tooltipMouseOut.bind(this))
         .call(d3.drag()
           .on('start', this.dragStarted.bind(this))
           .on('drag', this.dragged.bind(this))
@@ -247,8 +269,9 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
       const zoom = d3.zoom().on('zoom', this.onZoom.bind(this));
       zoom(this.svg);
 
-      this.nodesSvg.append('title')
+      /*this.nodesSvg.append('title')
         .text((d) => d['id']);
+        */
 
       this.simulation
         .nodes(this.nodes)
@@ -285,6 +308,11 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.edgesSvg
       .attr('stroke', styleObject.edgeColor);
+
+    if (this.options.showArrows === true) {
+      this.defs
+        .attr('fill', styleObject.arrowColor);
+    }
   }
 
   ticked() {
@@ -299,6 +327,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   dragStarted(d: any) {
+    this.tooltipDisabled = true;
     if (!d3.event.active) {
       this.simulation.alphaTarget(0.3).restart();
     }
@@ -312,11 +341,29 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   dragEnded(d: any) {
+    this.tooltipDisabled = false;
     if (!d3.event.active) {
       this.simulation.alphaTarget(0);
     }
     d.fx = null;
     d.fy = null;
+  }
+
+  tooltipMouseOver(d: any) {
+    if (this.tooltipDisabled === false) {
+      this.tooltipDiv.transition()
+        .duration(200)
+        .style('opacity', .9);
+      this.tooltipDiv.html(d['id'])
+        .style('left', (d3.event.pageX) + 'px')
+        .style('top', (d3.event.pageY - 40) + 'px');
+    }
+  }
+
+  tooltipMouseOut(d: any) {
+    this.tooltipDiv.transition()
+      .duration(500)
+      .style('opacity', 0);
   }
 
   onZoom() {
