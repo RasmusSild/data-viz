@@ -2,26 +2,22 @@
   <h3 class="modal-title">Full centrality comparison</h3>
   <div class="modal-body">
     <div>
-      <table class="table data-table">
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>EigenVector</th>
-          <th>Betweenness</th>
-          <th>Closeness</th>
-          <th>Degree</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let entry of data">
-          <td>{{entry.id}}</td>
-          <td>{{entry.Eigenvector}}</td>
-          <td>{{entry.Betweenness}}</td>
-          <td>{{entry.Closeness}}</td>
-          <td>{{entry.Degree}}</td>
-        </tr>
-        </tbody>
-      </table>
+      <clr-datagrid>
+        <clr-dg-column [clrDgField]="'id'">ID</clr-dg-column>
+        <clr-dg-column [clrDgField]="'Eigenvector'">Eigenvector</clr-dg-column>
+        <clr-dg-column [clrDgField]="'Betweenness'">Betweenness</clr-dg-column>
+        <clr-dg-column [clrDgField]="'Closeness'">Closeness</clr-dg-column>
+        <clr-dg-column [clrDgField]="'Degree'">Degree</clr-dg-column>
+
+        <clr-dg-row *clrDgItems="let entry of data">
+          <clr-dg-cell>{{entry.id}}</clr-dg-cell>
+          <clr-dg-cell>{{entry.Eigenvector}}</clr-dg-cell>
+          <clr-dg-cell>{{entry.Betweenness}}</clr-dg-cell>
+          <clr-dg-cell>{{entry.Closeness}}</clr-dg-cell>
+          <clr-dg-cell>{{entry.Degree}}</clr-dg-cell>
+        </clr-dg-row>
+
+      </clr-datagrid>
     </div>
   </div>
   <div class="modal-footer">

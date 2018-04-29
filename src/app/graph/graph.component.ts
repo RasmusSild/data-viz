@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Mode, getViewportDimensions } from '../global';
 import { Subscription } from 'rxjs/Subscription';
 import { ResizeService } from '../resize.service';
@@ -15,7 +15,7 @@ const ngraph = require('ngraph.graph');
             <div class='tooltip'></div>`,
   styleUrls: ['./graph.component.css']
 })
-export class GraphComponent implements OnInit, OnChanges, OnDestroy {
+export class GraphComponent implements OnInit, OnDestroy {
 
   @Input() options: any;
   @Output() tableData = new EventEmitter();
@@ -32,7 +32,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   private betweenness;
   private degree;
   private closeness;
-  private clustering;
+  // private clustering;
   private colorScale;
   private sizeScale;
   private containerGroup;
@@ -59,11 +59,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     this.drawGraph();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    // this.svg.selectAll('*').remove();
-    // this.drawGraph();
-  }
-
   ngOnDestroy() {
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
@@ -71,15 +66,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   formatData() {
-    if (this.options.dataType === 'csv' || this.options.dataType === 'tsv') {
-      this.formatDSV(this.options.dataType);
+    let edgelist;
+    if (this.options.dataType === 'csv') {
+      edgelist = d3.csvParse(this.options.data);
+    } else if (this.options.dataType === 'tsv') {
+      edgelist = d3.csvParse(this.options.data);
     } else {
-      this.formatJSON();
+      edgelist = this.options.data;
     }
-  }
 
-  formatDSV(dataType) {
-    const edgelist = dataType === 'csv' ? d3.csvParse(this.options.data) : d3.tsvParse(this.options.data);
     const nodeHash = {};
     const nodes = [];
     const edges = [];
@@ -106,18 +101,15 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
 
     this.nodes = nodes;
     this.edges = edges;
+
   }
 
-  formatJSON() {
-    console.log(JSON.parse(this.options.data));
-  }
 
   changeVizMode(mode: Mode) {
     this.evExtent = d3.extent(d3.values(this.eigenvector._stringValues));
     this.bwExtent = d3.extent(d3.values(this.betweenness._stringValues));
     this.cnExtent = d3.extent(d3.values(this.closeness));
     this.dgExtent = d3.extent(d3.values(this.degree));
-    // const clExtent = d3.extent(d3.values(this.clustering._stringValues));
 
     if (mode === Mode.Eigenvector) {
       this.mode = Mode.Eigenvector;
@@ -158,10 +150,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     const nodeMap = this.nodes.map((d) => d.id);
     const edgeMap = this.edges.map((d) => [d.source.id, d.target.id]);
 
-    for (const node in nodeMap) {
-      if (nodeMap.hasOwnProperty(node)) {
-        ng.addNode(node);
-      }
+    for (let i = 0; i < nodeMap.length; i++) {
+      ng.addNode(nodeMap[i]);
     }
 
     for (let i = 0; i < edgeMap.length; i++) {
@@ -188,7 +178,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         });
     }
 
-    this.clustering = jsnx.clustering(this.graph);
+    // this.clustering = jsnx.clustering(this.graph);
     this.tableData.emit(this.eigenvector._stringValues);
     this.sendFullTableData.emit(this.fullTableData);
   }
@@ -199,8 +189,8 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     this.colorScale = d3.scaleLinear()
       .domain([0, 0.5, 1])
       .range([<any>'#0000ff', '#00ff00', '#ff0000']);
-    this.sizeScale = d3.scaleLinear().domain([0, 1]).range([8, 20]);
-    // this.sizeScale.domain(clExtent);
+    this.sizeScale = d3.scaleLinear().domain([0, 1]).range([8, 50]);
+    this.sizeScale.domain(evExtent);
     this.colorScale.domain([d3.min(evExtent), d3.mean(<any>evExtent), d3.max(evExtent)]);
 
     this.svg = d3.select('svg');
@@ -218,14 +208,14 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         .attrs({
           'id': 'arrowhead',
           'viewBox': '-0 -5 10 10',
-          'refX': 13,
+          'refX': 17,
           'refY': 0,
           'orient': 'auto',
           'markerWidth' : 5,
           'markerHeight': 5,
           'xoverflow': 'visible'})
         .append('svg:path')
-        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('d', 'M0,-5L10,0L0,5')
         .attr('fill', '#999')
         .style('stroke', 'none');
     }
@@ -244,7 +234,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         .data(this.edges)
         .enter().append('line')
         .attr('stroke', '#999')
-        .attr('stroke-width', (d) => Math.sqrt(d['weight']))
+        .attr('stroke-width', 2)
         .attr('class', 'edge');
 
       if (this.options.showArrows === true) {
@@ -257,7 +247,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
         .data(this.nodes)
         .enter().append('circle')
         .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
-        // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]))
+        // .attr('r', (d) => this.sizeScale(this.eigenvector._stringValues[d.id]))
         .attr('r', this.nodeSize)
         .on('mouseover', this.tooltipMouseOver.bind(this))
         .on('mouseout', this.tooltipMouseOut.bind(this))
@@ -268,10 +258,6 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
 
       const zoom = d3.zoom().on('zoom', this.onZoom.bind(this));
       zoom(this.svg);
-
-      /*this.nodesSvg.append('title')
-        .text((d) => d['id']);
-        */
 
       this.simulation
         .nodes(this.nodes)
@@ -310,6 +296,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
       .attr('stroke', styleObject.edgeColor);
 
     if (this.options.showArrows === true) {
+      d3.select('marker').attr('refX', this.nodeSize + 10);
       this.defs
         .attr('fill', styleObject.arrowColor);
     }
@@ -360,7 +347,7 @@ export class GraphComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  tooltipMouseOut(d: any) {
+  tooltipMouseOut() {
     this.tooltipDiv.transition()
       .duration(500)
       .style('opacity', 0);

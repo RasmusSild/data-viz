@@ -1,4 +1,4 @@
-<clr-wizard #wizard [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg" [clrWizardClosable]="false">
+<clr-wizard *ngIf="demoMode === false" #wizard [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg" [clrWizardClosable]="false">
   <clr-wizard-title>Steps to generate graph</clr-wizard-title>
 
   <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
@@ -82,7 +82,7 @@
           <label for="root-select">Root nodes column:</label>
           <div class="select">
             <select id="root-select" [(ngModel)]="rootNodeValue" [ngModelOptions]="{standalone: true}">
-              <option *ngFor="let column of dataColumns" [selected]="column == dataColumns[0]" [attr.value]="column">{{column}}</option>
+              <option *ngFor="let c1 of dataColumns">{{c1}}</option>
             </select>
           </div>
         </div>
@@ -90,7 +90,7 @@
           <label for="dest-select">Destination nodes column:</label>
           <div class="select">
             <select id="dest-select" [(ngModel)]="destNodeValue" [ngModelOptions]="{standalone: true}">
-              <option *ngFor="let column of dataColumns" [selected]="column == dataColumns[1]" [attr.value]="column">{{column}}</option>
+              <option *ngFor="let c2 of dataColumns">{{c2}}</option>
             </select>
           </div>
         </div>
@@ -103,6 +103,10 @@
   </clr-wizard-page>
 
 </clr-wizard>
+
+<div class="row" style="margin-left: 20px;" *ngIf="demoMode === true">
+  <h1>DEMO MODE TBA</h1>
+</div>
 
 <div class="row" id="editor" *ngIf="options">
   <div class="col-xs-8" id="graph-container">
@@ -136,39 +140,15 @@
                 Degree
               </button>
             </div>
-            <!--<div class="form-group">
-              <div class="toggle-switch">
-                <input type="checkbox" id="toggle_1"
-                       [checked]="mode === modes.Eigenvector"
-                       [disabled]="mode === modes.Eigenvector">
-                <label for="toggle_1">Eigenvector</label>
-              </div>
-              <div class="toggle-switch">
-                <input type="checkbox" id="toggle_2"
-                       [checked]="mode === modes.Betweenness"
-                       [disabled]="mode === modes.Betweenness">
-                <label for="toggle_2">Betweenness</label>
-              </div>
-              <div class="toggle-switch">
-                <input type="checkbox" id="toggle_3"
-                       [checked]="mode === modes.Closeness"
-                       [disabled]="mode === modes.Closeness">
-                <label for="toggle_3">Closeness</label>
-              </div>
-              <div class="toggle-switch">
-                <input type="checkbox" id="toggle_4"
-                       [checked]="mode === modes.Degree"
-                       [disabled]="mode === modes.Degree">
-                <label for="toggle_4">Degree</label>
-              </div>
-            </div>-->
             <div *ngIf="tableData">
-              <app-centrality-table (close)="showCentralityTable = false" [open]="showCentralityTable" [data]="centralityTableData"></app-centrality-table>
-              <button class="btn"
-                      [disabled]="!centralityTableData"
-                      (click)="showCentralityTable = true">
-                Show full table
-              </button>
+              <div>
+                <app-centrality-table (close)="showCentralityTable = false" [open]="showCentralityTable" [data]="centralityTableData"></app-centrality-table>
+                <button class="btn"
+                        [disabled]="!centralityTableData"
+                        (click)="showCentralityTable = true">
+                  Show full table
+                </button>
+              </div>
               <table class="table data-table">
                 <thead>
                 <tr>

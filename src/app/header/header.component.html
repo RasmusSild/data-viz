@@ -3,8 +3,8 @@
   <div class="header-nav">
     <a routerLink="/" class="nav-link nav-text" [ngClass]="{'active': homeActive === true}">Home</a>
     <a routerLink="new" class="nav-link nav-text" [ngClass]="{'active': editorActive === true}">Graph Editor</a>
-    <a href="javascript://" class="nav-link nav-text">Demo</a>
-    <a href="javascript://" class="nav-link nav-text">Help</a>
+    <a routerLink="demo" class="nav-link nav-text" [ngClass]="{'active': demoActive === true}">Demo</a>
+    <a routerLink="help" class="nav-link nav-text" [ngClass]="{'active': helpActive === true}">Help</a>
   </div>
   <div class="header-actions"></div>
 </header>

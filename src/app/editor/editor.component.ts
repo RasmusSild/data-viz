@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../global';
 import { GraphComponent } from '../graph/graph.component';
 import * as d3 from 'd3';
@@ -11,6 +11,7 @@ import { ClrWizard } from '@clr/angular';
 })
 export class EditorComponent implements OnInit, AfterViewInit {
 
+  @Input() demoMode = false;
   @ViewChild(GraphComponent) graph: GraphComponent;
   @ViewChild('wizard') wizard: ClrWizard;
   data: any;
@@ -57,7 +58,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   receivedFullTableData(data) {
     this.centralityTableData = data;
-    this.tableDataKeys = Object.keys(data);
   }
 
   receivedStyleObject(data) {
@@ -95,7 +95,26 @@ export class EditorComponent implements OnInit, AfterViewInit {
   page1Handler(buttonType) {
     if ('custom-next' === buttonType) {
       if (!this.dataValue) {this.error = 'Missing or faulty data!'; return; }
-      this.dataColumns = d3.csvParse(this.dataValue).columns;
+      const extension = this.file.name.split('.').pop();
+      if (extension === 'csv') {
+        this.dataColumns = d3.csvParse(this.dataValue).columns;
+      } else if (extension === 'tsv') {
+        this.dataColumns = d3.tsvParse(this.dataValue).columns;
+      } else if (extension === 'json') {
+        this.dataValue = JSON.parse(this.dataValue);
+        if (Array.isArray(this.dataValue)) {
+          console.log(this.dataValue[0]);
+        } else {
+          const keys = Object.keys(this.dataValue);
+          this.dataValue = this.dataValue[keys[0]];
+        }
+        this.dataColumns = Object.keys(this.dataValue[0]);
+      } else {
+        this.error = 'File format not supported!';
+        return;
+      }
+      this.rootNodeValue = this.dataColumns[0];
+      this.destNodeValue = this.dataColumns[1];
       if (this.fileSuccess === true) {this.fileSuccess = false; }
       this.wizard.next();
     }

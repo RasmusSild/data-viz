@@ -26,11 +26,19 @@ export class HeaderComponent implements OnInit, AfterViewInit {
         url = event.url;
         if (url.length === 1) {
           this.homeActive = true;
-          this.editorActive = false;
+          this.editorActive = this.demoActive = this.helpActive = false;
         }
-        if (url.length === 4) {
-          this.homeActive = false;
+        if (url === '/new') {
           this.editorActive = true;
+          this.homeActive = this.demoActive = this.helpActive = false;
+        }
+        if (url === '/demo') {
+          this.demoActive = true;
+          this.homeActive = this.editorActive = this.helpActive = false;
+        }
+        if (url === '/help') {
+          this.helpActive = true;
+          this.homeActive = this.demoActive = this.editorActive = false;
         }
       }
     });
