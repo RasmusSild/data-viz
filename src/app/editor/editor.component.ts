@@ -18,10 +18,9 @@ export class EditorComponent implements OnInit, AfterViewInit {
   dataValue: any;
   error: string;
   options: any;
-  dataProvider = 'file';
   file: File;
   modes = Mode;
-  mode: Mode = Mode.Eigenvector;
+  mode: Mode = Mode.Degree;
   tableData;
   tableDataKeys;
   dataColumns;
@@ -47,9 +46,13 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   }
 
-  /*changeDataProvider(value) {
-    this.dataProvider = value;
-  }*/
+  reset() {
+    this.fileError = this.fileSuccess = this.customiserActive = this.showArrows = false;
+    this.wizardOpen = this.centralityActive = this.uploaderVisible = true;
+    this.options = this.data = this.dataValue = this.error = this.tableData = this.tableDataKeys =
+      this.dataColumns = this.graphStyle = this.rootNodeValue = this.destNodeValue = this.centralityTableData = null;
+    this.wizard.reset();
+  }
 
   receivedTableData(data) {
     this.tableData = data;
@@ -80,14 +83,12 @@ export class EditorComponent implements OnInit, AfterViewInit {
       this.fileError = true;
       this.fileSuccess = false;
       this.error = null;
-      setTimeout(() => { this.fileError = false; }, 3000);
     };
     fileReader.onload = (e) => {
       this.fileSuccess = true;
       this.fileError = false;
       this.error = null;
       this.dataValue = fileReader.result;
-      setTimeout(() => { this.fileSuccess = false; }, 3000);
     };
     fileReader.readAsText(this.file);
   }

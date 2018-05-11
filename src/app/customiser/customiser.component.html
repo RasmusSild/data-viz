@@ -53,6 +53,16 @@
             <span class="tooltip-content">This field cannot be empty!</span>
           </label>
         </div>
+        <div class="form-group">
+          <label class="required">Width of links:</label>
+          <input *ngIf="styleObject.linksWidth" id="links_width2" type="number" [(ngModel)]="styleObject.linksWidth"
+                 name="links_width2"/>
+          <label *ngIf="!styleObject.linksWidth" for="links_width" aria-haspopup="true" role="tooltip"
+                 class="tooltip tooltip-top-left tooltip-validation invalid tooltip-sm">
+            <input id="links_width" type="number" [(ngModel)]="styleObject.linksWidth" name="links_width"/>
+            <span class="tooltip-content">This field cannot be empty!</span>
+          </label>
+        </div>
         <button [disabled]="!styleObject.nodeSize" type="button" (click)="applyStyle($event)" class="btn btn-primary">Apply style</button>
       </section>
     </form>

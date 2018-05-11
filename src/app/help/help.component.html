@@ -1,3 +1,40 @@
-<h1>
-  Help page placeholder
-</h1>
+<div class="row">
+  <div class="col-xs-3"></div>
+  <div class="col-xs-6" style="margin-bottom: 40px;">
+    <h1>What is graph centrality?</h1>
+    <p>
+      In graph theory and network analysis,
+      indicators of centrality identify the most important vertices within a graph.
+      Applications include identifying the most influential person(s) in a social network, key infrastructure nodes in the Internet or urban networks, and super-spreaders of disease.
+      Centrality concepts were first developed in social network analysis, and many of the terms used to measure centrality reflect their sociological origin.
+      They should not be confused with node influence metrics, which seek to quantify the influence of every node in the network.
+    </p>
+    <h3>Degree Centrality</h3>
+    <p>
+      Historically first and conceptually simplest is degree centrality, which is defined as the number of links incident upon a node (i.e., the number of ties that a node has).
+      The degree can be interpreted in terms of the immediate risk of a node for catching whatever is flowing through the network (such as a virus, or some information).
+      In the case of a directed network (where ties have direction), we usually define two separate measures of degree centrality, namely indegree and outdegree.
+      Accordingly, indegree is a count of the number of ties directed to the node and outdegree is the number of ties that the node directs to others.
+      When ties are associated to some positive aspects such as friendship or collaboration, indegree is often interpreted as a form of popularity, and outdegree as gregariousness.
+    </p>
+    <h3>Closeness Centrality</h3>
+    <p>
+      n a connected graph, the normalized closeness centrality (or closeness) of a node is the average length of the shortest path between the node and all other nodes in the graph.
+      Thus the more central a node is, the closer it is to all other nodes.
+    </p>
+    <h3>Betweenness Centrality</h3>
+    <p>
+      Betweenness is a centrality measure of a vertex within a graph (there is also edge betweenness, which is not discussed here).
+      Betweenness centrality quantifies the number of times a node acts as a bridge along the shortest path between two other nodes.
+      It was introduced as a measure for quantifying the control of a human on the communication between other humans in a social network by Linton Freeman.
+      In his conception, vertices that have a high probability to occur on a randomly chosen shortest path between two randomly chosen vertices have a high betweenness.
+    </p>
+    <h3>Eigenvector Centrality</h3>
+    <p>Eigenvector centrality (also called eigencentrality) is a measure of the influence of a node in a network.
+      It assigns relative scores to all nodes in the network based on the concept that connections to high-scoring nodes contribute more to the score of the node in
+      question than equal connections to low-scoring nodes. Google's PageRank and the Katz centrality are variants of the eigenvector centrality.
+    </p>
+    <p style="text-align:right;">Source: <a href="https://en.wikipedia.org/wiki/Centrality">https://en.wikipedia.org/wiki/Centrality</a></p>
+  </div>
+  <div class="col-xs-3"></div>
+</div>

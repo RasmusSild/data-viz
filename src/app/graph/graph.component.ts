@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { ResizeService } from '../resize.service';
 import * as d3 from 'd3';
 import 'd3-selection-multi';
+import { legendColor } from 'd3-svg-legend';
 import * as jsnx from 'jsnetworkx';
 declare var require: any;
 const centrality = require('ngraph.centrality');
@@ -11,7 +12,7 @@ const ngraph = require('ngraph.graph');
 
 @Component({
   selector: 'app-graph',
-  template: `<svg id='graph' height="1020" width="1280"></svg>
+  template: `<svg id='graph' height='1020' width='1280' style="position: relative"></svg>
             <div class='tooltip'></div>`,
   styleUrls: ['./graph.component.css']
 })
@@ -41,11 +42,15 @@ export class GraphComponent implements OnInit, OnDestroy {
   private bwExtent;
   private cnExtent;
   private dgExtent;
-  private mode = Mode.Eigenvector;
+  private mode = Mode.Degree;
   private nodeSize = 7;
+  private linksWidth = 2;
   private defs;
   private tooltipDiv;
   private tooltipDisabled = false;
+  private linkedByIndex = {};
+  private toggle = 0;
+  private legend;
 
   constructor(private resizeService: ResizeService) {}
 
@@ -104,29 +109,26 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   }
 
-
   changeVizMode(mode: Mode) {
-    this.evExtent = d3.extent(d3.values(this.eigenvector._stringValues));
-    this.bwExtent = d3.extent(d3.values(this.betweenness._stringValues));
+    this.evExtent = d3.extent(d3.values(this.eigenvector));
+    this.bwExtent = d3.extent(d3.values(this.betweenness));
     this.cnExtent = d3.extent(d3.values(this.closeness));
     this.dgExtent = d3.extent(d3.values(this.degree));
 
     if (mode === Mode.Eigenvector) {
       this.mode = Mode.Eigenvector;
-      // this.sizeScale.domain(clExtent);
       this.colorScale.domain([d3.min(this.evExtent), d3.mean(<any>this.evExtent), d3.max(this.evExtent)]);
       this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
+        .attr('fill', (d) => this.colorScale(this.eigenvector[d.id]))
         .attr('r', this.nodeSize);
-        // .attr('r', (d) => this.sizeScale(this.clustering._stringValues[d.id]));
-      this.tableData.emit(this.eigenvector._stringValues);
+      this.tableData.emit(this.eigenvector);
     } else if (mode === Mode.Betweenness) {
       this.mode = Mode.Betweenness;
       this.colorScale.domain([d3.min(this.bwExtent), d3.mean(<any>this.bwExtent), d3.max(this.bwExtent)]);
       this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.betweenness._stringValues[d.id]))
+        .attr('fill', (d) => this.colorScale(this.betweenness[d.id]))
         .attr('r', this.nodeSize);
-      this.tableData.emit(this.betweenness._stringValues);
+      this.tableData.emit(this.betweenness);
     } else if (mode === Mode.Closeness) {
       this.mode = Mode.Closeness;
       this.colorScale.domain([d3.min(this.cnExtent), d3.mean(<any>this.cnExtent), d3.max(this.cnExtent)]);
@@ -142,6 +144,8 @@ export class GraphComponent implements OnInit, OnDestroy {
         .attr('r', this.nodeSize);
       this.tableData.emit(this.degree);
     }
+
+    this.redrawLegend();
   }
 
   createGraph() {
@@ -151,7 +155,11 @@ export class GraphComponent implements OnInit, OnDestroy {
     const edgeMap = this.edges.map((d) => [d.source.id, d.target.id]);
 
     for (let i = 0; i < nodeMap.length; i++) {
-      ng.addNode(nodeMap[i]);
+      try {
+        ng.addNode(nodeMap[i]);
+      } catch (e) {
+        console.log(e);
+      }
     }
 
     for (let i = 0; i < edgeMap.length; i++) {
@@ -164,34 +172,34 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.graph = graph;
 
     this.degree = centrality.degree(ng);
-    this.closeness = centrality.closeness(ng);
-    this.betweenness = jsnx.betweennessCentrality(this.graph);
-    this.eigenvector = jsnx.eigenvectorCentrality(this.graph);
+    this.closeness = this.roundCentralityData(centrality.closeness(ng), 5);
+    this.betweenness = this.roundCentralityData(jsnx.betweennessCentrality(this.graph)._stringValues, 5);
+    this.eigenvector = this.roundCentralityData(jsnx.eigenvectorCentrality(this.graph)._stringValues, 5);
 
-    for (const key in this.eigenvector._stringValues) {
+    for (const key in this.eigenvector) {
         this.fullTableData.push({
           id: key,
-          Eigenvector: this.eigenvector._stringValues[key],
-          Betweenness: this.betweenness._stringValues[key],
+          Eigenvector: this.eigenvector[key],
+          Betweenness: this.betweenness[key],
           Closeness: this.closeness[key],
           Degree: this.degree[key]
         });
     }
 
-    // this.clustering = jsnx.clustering(this.graph);
-    this.tableData.emit(this.eigenvector._stringValues);
+    console.log(this.degree);
+    this.tableData.emit(this.degree);
     this.sendFullTableData.emit(this.fullTableData);
   }
 
   drawGraph() {
-    const evExtent = d3.extent(d3.values(this.eigenvector._stringValues));
+    const dgExtent = d3.extent(d3.values(this.degree));
 
     this.colorScale = d3.scaleLinear()
       .domain([0, 0.5, 1])
       .range([<any>'#0000ff', '#00ff00', '#ff0000']);
     this.sizeScale = d3.scaleLinear().domain([0, 1]).range([8, 50]);
-    this.sizeScale.domain(evExtent);
-    this.colorScale.domain([d3.min(evExtent), d3.mean(<any>evExtent), d3.max(evExtent)]);
+    this.sizeScale.domain(dgExtent);
+    this.colorScale.domain([d3.min(dgExtent), d3.mean(<any>dgExtent), d3.max(dgExtent)]);
 
     this.svg = d3.select('svg');
     const viewport = getViewportDimensions();
@@ -234,7 +242,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         .data(this.edges)
         .enter().append('line')
         .attr('stroke', '#999')
-        .attr('stroke-width', 2)
+        .attr('stroke-width', this.linksWidth)
         .attr('class', 'edge');
 
       if (this.options.showArrows === true) {
@@ -246,11 +254,12 @@ export class GraphComponent implements OnInit, OnDestroy {
         .selectAll('circle')
         .data(this.nodes)
         .enter().append('circle')
-        .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]))
-        // .attr('r', (d) => this.sizeScale(this.eigenvector._stringValues[d.id]))
+        .attr('id', (d) => d.id)
+        .attr('fill', (d) => this.colorScale(this.degree[d.id]))
         .attr('r', this.nodeSize)
         .on('mouseover', this.tooltipMouseOver.bind(this))
         .on('mouseout', this.tooltipMouseOut.bind(this))
+        .on('click', this.showConnectedNodes.bind(this))
         .call(d3.drag()
           .on('start', this.dragStarted.bind(this))
           .on('drag', this.dragged.bind(this))
@@ -266,7 +275,42 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.simulation.force('link')
         .links(this.edges);
 
+      for (let i = 0; i < this.nodes.length; i++) {
+        this.linkedByIndex[i + ',' + i] = 1;
+      }
+
+      this.edges.forEach((d) => {
+        this.linkedByIndex[d.source.index + ',' + d.target.index] = 1;
+      });
+
+      this.drawLegend();
+
     }
+  }
+
+  drawLegend() {
+    this.svg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', 'translate(20,20)');
+
+    this.legend = legendColor()
+      .shapeWidth(40)
+      .orient('horizontal')
+      .scale(this.colorScale);
+
+    if (this.mode === Mode.Degree) {
+      this.legend.labelFormat(d3.format('.0f'));
+    } else {
+      this.legend.labelFormat(d3.format('.2f'));
+    }
+
+    this.svg.select('.legend')
+      .call(this.legend);
+  }
+
+  redrawLegend() {
+    this.svg.select('.legendLinear').remove();
+    this.drawLegend();
   }
 
   applyStyleFromObject(styleObject) {
@@ -275,10 +319,10 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     if (this.mode === Mode.Eigenvector) {
       this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.eigenvector._stringValues[d.id]));
+        .attr('fill', (d) => this.colorScale(this.eigenvector[d.id]));
     } else if (this.mode === Mode.Betweenness) {
       this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.betweenness._stringValues[d.id]));
+        .attr('fill', (d) => this.colorScale(this.betweenness[d.id]));
     } else if (this.mode === Mode.Closeness) {
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.closeness[d.id]));
@@ -288,18 +332,22 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
 
     this.nodeSize = styleObject.nodeSize;
+    this.linksWidth = styleObject.linksWidth;
 
     this.nodesSvg
       .attr('r', this.nodeSize);
 
     this.edgesSvg
-      .attr('stroke', styleObject.edgeColor);
+      .attr('stroke', styleObject.edgeColor)
+      .attr('stroke-width', this.linksWidth);
 
     if (this.options.showArrows === true) {
       d3.select('marker').attr('refX', this.nodeSize + 10);
       this.defs
         .attr('fill', styleObject.arrowColor);
     }
+
+    this.redrawLegend();
   }
 
   ticked() {
@@ -366,6 +414,35 @@ export class GraphComponent implements OnInit, OnDestroy {
       height = +this.svg.attr('height');
 
     this.simulation.force('center', d3.forceCenter(width / 2, height / 2));
+  }
+
+  neighboring(a, b) {
+    return this.linkedByIndex[a.index + ',' + b.index];
+  }
+
+  showConnectedNodes(d: any) {
+    console.log(d);
+    if (this.toggle === 0) {
+      this.nodesSvg.style('opacity', (o) => {
+        return this.neighboring(d, o) || this.neighboring(o, d) ? 1 : 0.1;
+      });
+      this.edgesSvg.style('opacity', (o) => {
+        return d.index === o.source.index || d.index === o.target.index ? 1 : 0.1;
+      });
+      this.toggle = 1;
+    } else {
+      this.nodesSvg.style('opacity', 1);
+      this.edgesSvg.style('opacity', 1);
+      this.toggle = 0;
+    }
+  }
+
+  roundCentralityData(data, decimal) {
+    for (const key in data) {
+      data[key] = +(data[key].toFixed(decimal));
+    }
+
+    return data;
   }
 
 }

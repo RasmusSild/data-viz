@@ -1,5 +1,10 @@
 <header class="header-6">
-  <div class="branding"></div>
+  <div class="branding">
+    <a routerLink="/" class="nav-link">
+      <img src="../../favicon.ico">
+      <span style="margin-left: 13px;" class="title">Graph Analyzer</span>
+    </a>
+  </div>
   <div class="header-nav">
     <a routerLink="/" class="nav-link nav-text" [ngClass]="{'active': homeActive === true}">Home</a>
     <a routerLink="new" class="nav-link nav-text" [ngClass]="{'active': editorActive === true}">Graph Editor</a>

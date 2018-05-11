@@ -13,24 +13,22 @@
     <ng-template clrPageTitle>Upload data</ng-template>
     <form *ngIf="uploaderVisible">
       <section class="form-block">
-        <!--<div class="form-group">
-          <label for="provider_select">Choose data provider</label>
-          <div class="select">
-            <select id="provider_select" #providerSelect (change)="changeDataProvider(providerSelect.value)">
-              <option value="manual">Paste data manually</option>
-              <option value="file" selected>Upload file</option>'
-            </select>
-          </div>
-        </div>-->
-        <!--<div class="form-group" *ngIf="dataProvider === 'manual'">
-          <label for="manualdata">Enter data</label>
-          <textarea name="manuel" id="manualdata" [(ngModel)]="dataValue" rows="5"></textarea>
-        </div>-->
-        <div class="form-group" *ngIf="dataProvider === 'file'">
-          <label for="upload">Upload data</label>
+        <div class="form-group">
+          <label for="upload">
+            Upload data
+            <clr-signpost>
+              <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+                <p style="margin-top: 0">
+                  The uploader only accepts CSV, TSV & JSON files.<br>
+                  CSV & TSV files must have a header row,<br>
+                  A JSON file must be an array of objects.
+                </p>
+              </clr-signpost-content>
+            </clr-signpost>
+          </label>
           <input type="file" id="upload" (change)="fileChanged($event)"/>
         </div>
-        <div class="form-group" *ngIf="dataProvider === 'file'">
+        <div class="form-group">
           <button [disabled]="!file" (click)="uploadFile()" class="btn btn-outline btn-sm">Upload</button>
         </div>
       </section>
@@ -111,6 +109,7 @@
 <div class="row" id="editor" *ngIf="options">
   <div class="col-xs-8" id="graph-container">
     <app-graph [options]="options" (tableData)="receivedTableData($event)" (sendFullTableData)="receivedFullTableData($event)"></app-graph>
+    <button class="btn btn-success reset_btn" (click)="reset()">New Graph</button>
   </div>
   <div id="toolbar" class="col-xs-4 editor-toolbar">
     <clr-tabs>
@@ -120,14 +119,9 @@
           <clr-tab-content>
             <div class="btn-group btn-primary mt-20">
               <button class="btn"
-                      [disabled]="mode === modes.Eigenvector"
-                      (click)="changeVizMode(modes.Eigenvector)">
-                Eigenvector
-              </button>
-              <button class="btn"
-                      [disabled]="mode === modes.Betweenness"
-                      (click)="changeVizMode(modes.Betweenness)">
-                Betweenness
+                      [disabled]="mode === modes.Degree"
+                      (click)="changeVizMode(modes.Degree)">
+                Degree
               </button>
               <button class="btn"
                       [disabled]="mode === modes.Closeness"
@@ -135,10 +129,24 @@
                 Closeness
               </button>
               <button class="btn"
-                      [disabled]="mode === modes.Degree"
-                      (click)="changeVizMode(modes.Degree)">
-                Degree
+                      [disabled]="mode === modes.Betweenness"
+                      (click)="changeVizMode(modes.Betweenness)">
+                Betweenness
               </button>
+              <button class="btn"
+                      [disabled]="mode === modes.Eigenvector"
+                      (click)="changeVizMode(modes.Eigenvector)">
+                Eigenvector
+              </button>
+              <clr-signpost>
+                <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
+                  <p style="margin-top: 0">
+                    These are the graph centrality measures available.
+                    You can toggle each one on or off<br>by clicking on the buttons.
+                  </p>
+                  <p><a routerLink="/help">Read more about centrality measures</a></p>
+                </clr-signpost-content>
+              </clr-signpost>
             </div>
             <div *ngIf="tableData">
               <div>

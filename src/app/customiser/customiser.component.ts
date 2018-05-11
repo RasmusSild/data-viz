@@ -13,9 +13,10 @@ export class CustomiserComponent implements OnInit {
     maxValueColor : '#ff0000',
     edgeColor : '#999999',
     arrowColor : '#999999',
-    nodeSize : 7
+    nodeSize : 7,
+    linksWidth: 1
   };
-
+//
   @Input() inputStyleObj: any;
   @Input() graphOptions: any;
   @Output() sendStyleObject = new EventEmitter();
@@ -30,14 +31,15 @@ export class CustomiserComponent implements OnInit {
         maxValueColor : this.inputStyleObj.maxValueColor,
         edgeColor : this.inputStyleObj.edgeColor,
         arrowColor : this.inputStyleObj.arrowColor,
-        nodeSize : this.inputStyleObj.nodeSize
+        nodeSize : this.inputStyleObj.nodeSize,
+        linksWidth: this.inputStyleObj.linksWidth
       };
     }
   }
 
   applyStyle(e) {
     e.preventDefault();
-    if (!this.styleObject.nodeSize) {
+    if (!this.styleObject.nodeSize || !this.styleObject.linksWidth) {
       return;
     } else {
       this.sendStyleObject.emit(this.styleObject);
