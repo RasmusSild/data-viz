@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, isDevMode } from '@angular/core';
+import { AfterViewInit, Component, isDevMode } from '@angular/core';
 import { Router, NavigationEnd, Event as NavigationEvent } from '@angular/router';
 
 @Component({

@@ -1,5 +1,6 @@
 <div id="bg">
-  <img src="../../assets/homepage-background-dark-blurred.png" alt="">
+  <img *ngIf="devMode" src="../../assets/homepage-background-dark-blurred.png" alt="">
+  <img *ngIf="!devMode" src="assets/homepage-background-dark-blurred.png" alt="">
 </div>
 <div class="row">
   <div class="col-xs-4"></div>
