@@ -12,13 +12,14 @@ const ngraph = require('ngraph.graph');
 
 @Component({
   selector: 'app-graph',
-  template: `<svg id='graph' height='1020' width='1280' style="position: relative"></svg>
+  template: `<svg id='graph' height='1020' width='1280'></svg>
             <div class='tooltip'></div>`,
   styleUrls: ['./graph.component.css']
 })
 export class GraphComponent implements OnInit, OnDestroy {
 
   @Input() options: any;
+  @Input() demoMode: boolean;
   @Output() tableData = new EventEmitter();
   @Output() sendFullTableData = new EventEmitter();
   private fullTableData = [];
@@ -33,7 +34,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   private betweenness;
   private degree;
   private closeness;
-  // private clustering;
   private colorScale;
   private sizeScale;
   private containerGroup;
@@ -72,19 +72,23 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   formatData() {
     let edgelist;
-    if (this.options.dataType === 'csv') {
-      edgelist = d3.csvParse(this.options.data);
-    } else if (this.options.dataType === 'tsv') {
-      edgelist = d3.csvParse(this.options.data);
-    } else {
-      edgelist = this.options.data;
-    }
-
     const nodeHash = {};
     const nodes = [];
     const edges = [];
     const root = this.options.rootNode;
     const dest = this.options.destNode;
+
+    if (this.demoMode && this.demoMode === true) {
+      edgelist = this.options.data;
+    } else {
+      if (this.options.dataType === 'csv') {
+        edgelist = d3.csvParse(this.options.data);
+      } else if (this.options.dataType === 'tsv') {
+        edgelist = d3.csvParse(this.options.data);
+      } else {
+        edgelist = this.options.data;
+      }
+    }
 
     edgelist.forEach((edge) => {
       if (!nodeHash[edge[root]]) {
@@ -121,28 +125,28 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.eigenvector[d.id]))
         .attr('r', this.nodeSize);
-      this.tableData.emit(this.eigenvector);
+      this.tableData.emit(this.sortCentralityData(this.eigenvector, 'desc'));
     } else if (mode === Mode.Betweenness) {
       this.mode = Mode.Betweenness;
       this.colorScale.domain([d3.min(this.bwExtent), d3.mean(<any>this.bwExtent), d3.max(this.bwExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.betweenness[d.id]))
         .attr('r', this.nodeSize);
-      this.tableData.emit(this.betweenness);
+      this.tableData.emit(this.sortCentralityData(this.betweenness, 'desc'));
     } else if (mode === Mode.Closeness) {
       this.mode = Mode.Closeness;
       this.colorScale.domain([d3.min(this.cnExtent), d3.mean(<any>this.cnExtent), d3.max(this.cnExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.closeness[d.id]))
         .attr('r', this.nodeSize);
-      this.tableData.emit(this.closeness);
+      this.tableData.emit(this.sortCentralityData(this.closeness, 'desc'));
     } else if (mode === Mode.Degree) {
       this.mode = Mode.Degree;
       this.colorScale.domain([d3.min(this.dgExtent), d3.mean(<any>this.dgExtent), d3.max(this.dgExtent)]);
       this.nodesSvg
         .attr('fill', (d) => this.colorScale(this.degree[d.id]))
         .attr('r', this.nodeSize);
-      this.tableData.emit(this.degree);
+      this.tableData.emit(this.sortCentralityData(this.degree, 'desc'));
     }
 
     this.redrawLegend();
@@ -186,8 +190,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         });
     }
 
-    console.log(this.degree);
-    this.tableData.emit(this.degree);
+    this.tableData.emit(this.sortCentralityData(this.degree, 'desc'));
     this.sendFullTableData.emit(this.fullTableData);
   }
 
@@ -211,7 +214,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     this.tooltipDiv = d3.select('.tooltip');
 
-    if (this.options.showArrows === true) {
+    if (this.options.showArrows && this.options.showArrows === true) {
       this.defs = this.svg.append('defs').append('marker')
         .attrs({
           'id': 'arrowhead',
@@ -245,7 +248,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         .attr('stroke-width', this.linksWidth)
         .attr('class', 'edge');
 
-      if (this.options.showArrows === true) {
+      if (this.options.showArrows && this.options.showArrows === true) {
         this.edgesSvg.attr('marker-end', 'url(#arrowhead)');
       }
 
@@ -341,7 +344,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       .attr('stroke', styleObject.edgeColor)
       .attr('stroke-width', this.linksWidth);
 
-    if (this.options.showArrows === true) {
+    if (this.options.showArrows && this.options.showArrows === true) {
       d3.select('marker').attr('refX', this.nodeSize + 10);
       this.defs
         .attr('fill', styleObject.arrowColor);
@@ -421,7 +424,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   showConnectedNodes(d: any) {
-    console.log(d);
     if (this.toggle === 0) {
       this.nodesSvg.style('opacity', (o) => {
         return this.neighboring(d, o) || this.neighboring(o, d) ? 1 : 0.1;
@@ -443,6 +445,25 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
 
     return data;
+  }
+
+  sortCentralityData(data, order) {
+    const keys = Object.keys(data);
+    const newArr = [];
+    if (order === 'desc') {
+      keys.sort((a, b) => data[b] - data[a]);
+    } else {
+      keys.sort((a, b) => data[a] - data[b]);
+    }
+    let i = 0;
+    while (i < keys.length) {
+      newArr.push({
+        id: keys[i],
+        value: data[keys[i]]
+      });
+      i++;
+    }
+    return newArr;
   }
 
 }

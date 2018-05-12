@@ -1,15 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import * as demo_data from './demo_graphdata.json';
 
 @Component({
   selector: 'app-demo',
-  templateUrl: './demo.component.html',
-  styleUrls: ['./demo.component.css']
+  template: '<app-editor [demoMode]="true" [demoOptions]="demo_options"></app-editor>'
 })
-export class DemoComponent implements OnInit {
+export class DemoComponent {
 
-  constructor() { }
+  demo_data = demo_data;
+  demo_options = {
+    data: this.demo_data,
+    dataType: 'json',
+    rootNode: 'Source',
+    destNode: 'Target',
+    showArrows: false
+  };
 
-  ngOnInit() {
-  }
+  constructor() {}
 
 }

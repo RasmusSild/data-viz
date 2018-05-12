@@ -6,7 +6,7 @@ import { Router, NavigationEnd, Event as NavigationEvent } from '@angular/router
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit, AfterViewInit {
+export class HeaderComponent implements AfterViewInit {
 
   homeActive: boolean;
   editorActive: boolean;
@@ -15,9 +15,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   devMode = isDevMode();
 
   constructor(private router: Router) {
-  }
-
-  ngOnInit() {
   }
 
   ngAfterViewInit() {

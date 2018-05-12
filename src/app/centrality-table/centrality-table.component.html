@@ -1,5 +1,16 @@
 <clr-modal [(clrModalOpen)]="open" [clrModalSize]="'xl'" (clrModalOpenChange)="openChange($event)">
-  <h3 class="modal-title">Full centrality comparison</h3>
+  <h3 class="modal-title">
+    Full centrality comparison
+    <clr-signpost>
+      <clr-signpost-content [clrPosition]="'bottom-middle'" *clrIfOpen>
+        <p style="margin-top: 0">
+          You can compare all the centrality measures on this page.<br>
+          Rows are sorted by clicking a column header.<br>
+          To filter rows, click on the filter icon on the right side of a column header.
+        </p>
+      </clr-signpost-content>
+    </clr-signpost>
+  </h3>
   <div class="modal-body">
     <div>
       <clr-datagrid>

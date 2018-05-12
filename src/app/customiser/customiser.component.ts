@@ -16,7 +16,7 @@ export class CustomiserComponent implements OnInit {
     nodeSize : 7,
     linksWidth: 1
   };
-//
+
   @Input() inputStyleObj: any;
   @Input() graphOptions: any;
   @Output() sendStyleObject = new EventEmitter();

@@ -1,0 +1,7 @@
+#app_header_nav {
+  z-index: 9999;
+}
+
+#app_header_nav.no_bg {
+  background: none;
+}

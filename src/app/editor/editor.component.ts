@@ -9,9 +9,10 @@ import { ClrWizard } from '@clr/angular';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css']
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class EditorComponent implements OnInit {
 
   @Input() demoMode = false;
+  @Input() demoOptions;
   @ViewChild(GraphComponent) graph: GraphComponent;
   @ViewChild('wizard') wizard: ClrWizard;
   data: any;
@@ -22,7 +23,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
   modes = Mode;
   mode: Mode = Mode.Degree;
   tableData;
-  tableDataKeys;
   dataColumns;
   fileError = false;
   fileSuccess = false;
@@ -40,23 +40,21 @@ export class EditorComponent implements OnInit, AfterViewInit {
   constructor() { }
 
   ngOnInit() {
-  }
-
-  ngAfterViewInit() {
-
+    if (this.demoOptions) {
+      this.options = this.demoOptions;
+    }
   }
 
   reset() {
     this.fileError = this.fileSuccess = this.customiserActive = this.showArrows = false;
     this.wizardOpen = this.centralityActive = this.uploaderVisible = true;
-    this.options = this.data = this.dataValue = this.error = this.tableData = this.tableDataKeys =
+    this.options = this.data = this.dataValue = this.error = this.tableData =
       this.dataColumns = this.graphStyle = this.rootNodeValue = this.destNodeValue = this.centralityTableData = null;
     this.wizard.reset();
   }
 
   receivedTableData(data) {
     this.tableData = data;
-    this.tableDataKeys = Object.keys(data);
   }
 
   receivedFullTableData(data) {

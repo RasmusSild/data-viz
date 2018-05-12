@@ -34,7 +34,6 @@
       </section>
       <section>
 
-        <!--************ Error messages ************-->
         <div *ngIf="fileSuccess">
           <clr-alert [clrAlertType]="'alert-success'">
             <div class="alert-item">
@@ -63,7 +62,6 @@
           </clr-alert>
         </div>
       </section>
-      <!--*****************************************-->
 
     </form>
   </clr-wizard-page>
@@ -102,14 +100,10 @@
 
 </clr-wizard>
 
-<div class="row" style="margin-left: 20px;" *ngIf="demoMode === true">
-  <h1>DEMO MODE TBA</h1>
-</div>
-
 <div class="row" id="editor" *ngIf="options">
   <div class="col-xs-8" id="graph-container">
     <app-graph [options]="options" (tableData)="receivedTableData($event)" (sendFullTableData)="receivedFullTableData($event)"></app-graph>
-    <button class="btn btn-success reset_btn" (click)="reset()">New Graph</button>
+    <button *ngIf="demoMode === false" class="btn btn-success reset_btn" (click)="reset()">New Graph</button>
   </div>
   <div id="toolbar" class="col-xs-4 editor-toolbar">
     <clr-tabs>
@@ -161,16 +155,16 @@
                 <thead>
                 <tr>
                   <th>ID</th>
-                  <th *ngIf="mode === modes.Eigenvector">EigenVector</th>
+                  <th *ngIf="mode === modes.Eigenvector">Eigenvector</th>
                   <th *ngIf="mode === modes.Betweenness">Betweenness</th>
                   <th *ngIf="mode === modes.Closeness">Closeness</th>
                   <th *ngIf="mode === modes.Degree">Degree</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let key of tableDataKeys">
-                  <td>{{key}}</td>
-                  <td>{{tableData[key]}}</td>
+                <tr *ngFor="let row of tableData">
+                  <td>{{row.id}}</td>
+                  <td>{{row.value}}</td>
                 </tr>
                 </tbody>
               </table>
