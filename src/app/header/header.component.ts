@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import { AfterViewInit, Component, OnInit, isDevMode } from '@angular/core';
 import { Router, NavigationEnd, Event as NavigationEvent } from '@angular/router';
 
 @Component({
@@ -12,6 +12,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   editorActive: boolean;
   demoActive: boolean;
   helpActive: boolean;
+  devMode = isDevMode();
 
   constructor(private router: Router) {
   }

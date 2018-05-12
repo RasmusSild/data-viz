@@ -1,7 +1,8 @@
 <header class="header-6">
   <div class="branding">
     <a routerLink="/" class="nav-link">
-      <img src="../../favicon.ico">
+      <img *ngIf="!devMode" src="../../favicon.ico">
+      <img *ngIf="devMode" src="favicon.ico">
       <span style="margin-left: 13px;" class="title">Graph Analyzer</span>
     </a>
   </div>
