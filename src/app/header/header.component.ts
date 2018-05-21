@@ -26,15 +26,15 @@ export class HeaderComponent implements AfterViewInit {
           this.homeActive = true;
           this.editorActive = this.demoActive = this.helpActive = false;
         }
-        if (url === '/new') {
+        if (url.indexOf('/new') >= 0) {
           this.editorActive = true;
           this.homeActive = this.demoActive = this.helpActive = false;
         }
-        if (url === '/demo') {
+        if (url.indexOf('/demo') >= 0) {
           this.demoActive = true;
           this.homeActive = this.editorActive = this.helpActive = false;
         }
-        if (url === '/help') {
+        if (url.indexOf('/help') >= 0) {
           this.helpActive = true;
           this.homeActive = this.demoActive = this.editorActive = false;
         }
