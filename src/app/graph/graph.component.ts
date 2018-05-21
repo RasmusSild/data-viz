@@ -12,8 +12,8 @@ const ngraph = require('ngraph.graph');
 
 @Component({
   selector: 'app-graph',
-  template: `<svg id='graph' height='1020' width='1280'></svg>
-            <div class='tooltip'></div>`,
+  template: '<svg id=\'graph\' height=\'1020\' width=\'1280\'></svg>\n' +
+  '<div class=\'tooltip\'></div>',
   styleUrls: ['./graph.component.css']
 })
 export class GraphComponent implements OnInit, OnDestroy {
@@ -22,6 +22,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   @Input() demoMode: boolean;
   @Output() tableData = new EventEmitter();
   @Output() sendFullTableData = new EventEmitter();
+  @Output() sendError = new EventEmitter();
   private fullTableData = [];
   private simulation: any;
   private svg: any;
@@ -51,6 +52,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private linkedByIndex = {};
   private toggle = 0;
   private legend;
+  private dataOk = false;
 
   constructor(private resizeService: ResizeService) {}
 
@@ -90,66 +92,34 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     }
 
-    edgelist.forEach((edge) => {
-      if (!nodeHash[edge[root]]) {
-        nodeHash[edge[root]] = {id: edge[root], label: edge[dest]};
-        nodes.push(nodeHash[edge[root]]);
-      }
-      if (!nodeHash[edge[dest]]) {
-        nodeHash[edge[dest]] = {id: edge[dest], label: edge[dest]};
-        nodes.push(nodeHash[edge[dest]]);
-      }
+    try {
+      edgelist.forEach((edge) => {
+        if (!nodeHash[edge[root]]) {
+          nodeHash[edge[root]] = {id: edge[root], label: edge[dest]};
+          nodes.push(nodeHash[edge[root]]);
+        }
+        if (!nodeHash[edge[dest]]) {
+          nodeHash[edge[dest]] = {id: edge[dest], label: edge[dest]};
+          nodes.push(nodeHash[edge[dest]]);
+        }
 
-      edges.push({
-        id: nodeHash[edge[root]].id + '-' + nodeHash[edge[dest]].id,
-        source: nodeHash[edge[root]],
-        target: nodeHash[edge[dest]],
-        weight: edge.weight
+        edges.push({
+          id: nodeHash[edge[root]].id + '-' + nodeHash[edge[dest]].id,
+          source: nodeHash[edge[root]],
+          target: nodeHash[edge[dest]],
+          weight: edge.weight
+        });
       });
-    });
+    } catch (e) {
+      console.log(e);
+      this.dataOk = false;
+      this.sendError.emit(this.dataOk);
+      return;
+    }
 
     this.nodes = nodes;
     this.edges = edges;
 
-  }
-
-  changeVizMode(mode: Mode) {
-    this.evExtent = d3.extent(d3.values(this.eigenvector));
-    this.bwExtent = d3.extent(d3.values(this.betweenness));
-    this.cnExtent = d3.extent(d3.values(this.closeness));
-    this.dgExtent = d3.extent(d3.values(this.degree));
-
-    if (mode === Mode.Eigenvector) {
-      this.mode = Mode.Eigenvector;
-      this.colorScale.domain([d3.min(this.evExtent), d3.mean(<any>this.evExtent), d3.max(this.evExtent)]);
-      this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.eigenvector[d.id]))
-        .attr('r', this.nodeSize);
-      this.tableData.emit(this.sortCentralityData(this.eigenvector, 'desc'));
-    } else if (mode === Mode.Betweenness) {
-      this.mode = Mode.Betweenness;
-      this.colorScale.domain([d3.min(this.bwExtent), d3.mean(<any>this.bwExtent), d3.max(this.bwExtent)]);
-      this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.betweenness[d.id]))
-        .attr('r', this.nodeSize);
-      this.tableData.emit(this.sortCentralityData(this.betweenness, 'desc'));
-    } else if (mode === Mode.Closeness) {
-      this.mode = Mode.Closeness;
-      this.colorScale.domain([d3.min(this.cnExtent), d3.mean(<any>this.cnExtent), d3.max(this.cnExtent)]);
-      this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.closeness[d.id]))
-        .attr('r', this.nodeSize);
-      this.tableData.emit(this.sortCentralityData(this.closeness, 'desc'));
-    } else if (mode === Mode.Degree) {
-      this.mode = Mode.Degree;
-      this.colorScale.domain([d3.min(this.dgExtent), d3.mean(<any>this.dgExtent), d3.max(this.dgExtent)]);
-      this.nodesSvg
-        .attr('fill', (d) => this.colorScale(this.degree[d.id]))
-        .attr('r', this.nodeSize);
-      this.tableData.emit(this.sortCentralityData(this.degree, 'desc'));
-    }
-
-    this.redrawLegend();
   }
 
   createGraph() {
@@ -163,6 +133,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         ng.addNode(nodeMap[i]);
       } catch (e) {
         console.log(e);
+        this.dataOk = false;
+        this.sendError.emit(this.dataOk);
+        return;
       }
     }
 
@@ -179,6 +152,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.closeness = this.roundCentralityData(centrality.closeness(ng), 5);
     this.betweenness = this.roundCentralityData(jsnx.betweennessCentrality(this.graph)._stringValues, 5);
     this.eigenvector = this.roundCentralityData(jsnx.eigenvectorCentrality(this.graph)._stringValues, 5);
+    this.dataOk = true;
+    this.sendError.emit(this.dataOk);
 
     for (const key in this.eigenvector) {
         this.fullTableData.push({
@@ -195,6 +170,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   drawGraph() {
+
+    if (this.dataOk === false) {
+      return;
+    }
+
     const dgExtent = d3.extent(d3.values(this.degree));
 
     this.colorScale = d3.scaleLinear()
@@ -316,6 +296,45 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.drawLegend();
   }
 
+  changeVizMode(mode: Mode) {
+    this.evExtent = d3.extent(d3.values(this.eigenvector));
+    this.bwExtent = d3.extent(d3.values(this.betweenness));
+    this.cnExtent = d3.extent(d3.values(this.closeness));
+    this.dgExtent = d3.extent(d3.values(this.degree));
+
+    if (mode === Mode.Eigenvector) {
+      this.mode = Mode.Eigenvector;
+      this.colorScale.domain([d3.min(this.evExtent), d3.mean(<any>this.evExtent), d3.max(this.evExtent)]);
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.eigenvector[d.id]))
+        .attr('r', this.nodeSize);
+      this.tableData.emit(this.sortCentralityData(this.eigenvector, 'desc'));
+    } else if (mode === Mode.Betweenness) {
+      this.mode = Mode.Betweenness;
+      this.colorScale.domain([d3.min(this.bwExtent), d3.mean(<any>this.bwExtent), d3.max(this.bwExtent)]);
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.betweenness[d.id]))
+        .attr('r', this.nodeSize);
+      this.tableData.emit(this.sortCentralityData(this.betweenness, 'desc'));
+    } else if (mode === Mode.Closeness) {
+      this.mode = Mode.Closeness;
+      this.colorScale.domain([d3.min(this.cnExtent), d3.mean(<any>this.cnExtent), d3.max(this.cnExtent)]);
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.closeness[d.id]))
+        .attr('r', this.nodeSize);
+      this.tableData.emit(this.sortCentralityData(this.closeness, 'desc'));
+    } else if (mode === Mode.Degree) {
+      this.mode = Mode.Degree;
+      this.colorScale.domain([d3.min(this.dgExtent), d3.mean(<any>this.dgExtent), d3.max(this.dgExtent)]);
+      this.nodesSvg
+        .attr('fill', (d) => this.colorScale(this.degree[d.id]))
+        .attr('r', this.nodeSize);
+      this.tableData.emit(this.sortCentralityData(this.degree, 'desc'));
+    }
+
+    this.redrawLegend();
+  }
+
   applyStyleFromObject(styleObject) {
     this.colorScale
       .range([<any>styleObject.minValueColor, styleObject.medValueColor, styleObject.maxValueColor]);
@@ -419,14 +438,14 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.simulation.force('center', d3.forceCenter(width / 2, height / 2));
   }
 
-  neighboring(a, b) {
+  isNeighboringNode(a, b) {
     return this.linkedByIndex[a.index + ',' + b.index];
   }
 
   showConnectedNodes(d: any) {
     if (this.toggle === 0) {
       this.nodesSvg.style('opacity', (o) => {
-        return this.neighboring(d, o) || this.neighboring(o, d) ? 1 : 0.1;
+        return this.isNeighboringNode(d, o) || this.isNeighboringNode(o, d) ? 1 : 0.1;
       });
       this.edgesSvg.style('opacity', (o) => {
         return d.index === o.source.index || d.index === o.target.index ? 1 : 0.1;

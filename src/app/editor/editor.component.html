@@ -1,4 +1,4 @@
-<clr-wizard *ngIf="demoMode === false" #wizard [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg" [clrWizardClosable]="false">
+<clr-wizard *ngIf="demoMode === false" #wizard [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg" (clrWizardOnCancel)="wizardCancel()" [clrWizardPreventDefaultCancel]="true">
   <clr-wizard-title>Steps to generate graph</clr-wizard-title>
 
   <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
@@ -8,6 +8,7 @@
 
   <clr-wizard-page (clrWizardPageCustomButton)="page1Handler($event)">
     <ng-template clrPageButtons>
+      <clr-wizard-button [type]="'custom-danger'">Cancel</clr-wizard-button>
       <clr-wizard-button [type]="'custom-next'">Next</clr-wizard-button>
     </ng-template>
     <ng-template clrPageTitle>Upload data</ng-template>
@@ -21,7 +22,7 @@
                 <p style="margin-top: 0">
                   The uploader only accepts CSV, TSV & JSON files.<br>
                   CSV & TSV files must have a header row,<br>
-                  A JSON file must be an array of objects.
+                  A JSON file must be an object<br>that contains an array of objects.
                 </p>
               </clr-signpost-content>
             </clr-signpost>
@@ -100,9 +101,17 @@
 
 </clr-wizard>
 
+<clr-alert *ngIf="graphGenerationError === true" [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true">
+  <clr-alert-item>
+        <span class="alert-text">
+            Could not generate graph! Please try a different file.
+        </span>
+  </clr-alert-item>
+</clr-alert>
+
 <div class="row" id="editor" *ngIf="options">
   <div class="col-xs-8" id="graph-container">
-    <app-graph [options]="options" (tableData)="receivedTableData($event)" (sendFullTableData)="receivedFullTableData($event)"></app-graph>
+    <app-graph [options]="options" (tableData)="receivedTableData($event)" (sendFullTableData)="receivedFullTableData($event)" (sendError)="receivedGraphError($event)"></app-graph>
     <button *ngIf="demoMode === false" class="btn btn-success reset_btn" (click)="reset()">New Graph</button>
   </div>
   <div id="toolbar" class="col-xs-4 editor-toolbar">
@@ -136,9 +145,9 @@
                 <clr-signpost-content [clrPosition]="'bottom-left'" *clrIfOpen>
                   <p style="margin-top: 0">
                     These are the graph centrality measures available.
-                    You can toggle each one on or off<br>by clicking on the buttons.
+                    You can toggle each one on or off<br>by clicking on the corresponding buttons.
                   </p>
-                  <p><a routerLink="/help">Read more about centrality measures</a></p>
+                  <p><a [routerLink]="['/help']" fragment="centrality">Read more about centrality measures</a></p>
                 </clr-signpost-content>
               </clr-signpost>
             </div>

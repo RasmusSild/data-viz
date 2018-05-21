@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-xs-3"></div>
-  <div class="col-xs-6" style="margin-bottom: 40px;">
-    <h1>What is graph centrality?</h1>
+  <div class="col-xs-6" style="margin-bottom: 100px;">
+    <h1 id="centrality">What is graph centrality?</h1>
     <p>
       In graph theory and network analysis,
       indicators of centrality identify the most important vertices within a graph.
@@ -19,7 +19,7 @@
     </p>
     <h3>Closeness Centrality</h3>
     <p>
-      n a connected graph, the normalized closeness centrality (or closeness) of a node is the average length of the shortest path between the node and all other nodes in the graph.
+      In a connected graph, the normalized closeness centrality (or closeness) of a node is the average length of the shortest path between the node and all other nodes in the graph.
       Thus the more central a node is, the closer it is to all other nodes.
     </p>
     <h3>Betweenness Centrality</h3>
@@ -35,6 +35,23 @@
       question than equal connections to low-scoring nodes. Google's PageRank and the Katz centrality are variants of the eigenvector centrality.
     </p>
     <p style="text-align:right;">Source: <a href="https://en.wikipedia.org/wiki/Centrality">https://en.wikipedia.org/wiki/Centrality</a></p>
+    <h1 id="customisation">How to customise Your graph</h1>
+    <h3>Colors</h3>
+    <p>
+      Graph customisation is done under the Customise tab on the editor toolbar.
+      You can change the colors that correspond to the currently chosen centrality measure.
+      There are color pickers available for the minimum, median & maximum value of the chosen measure.
+      Graph nodes are colored according to the chosen colors.
+      You can also change the color of the connections between nodes.
+      If the directed graph option was chosen during setup, then you can also change the color of the direction arrows.
+    </p>
+    <h3>Sizes</h3>
+    <p>
+      Lastly you can change the size of the graph nodes & edges manually. These are numbered values, that correspond to each node's radius in pixels.
+    </p>
+    <p>
+      All changes that you make are applied by pressing the "Apply style" button.
+    </p>
   </div>
   <div class="col-xs-3"></div>
 </div>

@@ -14,7 +14,7 @@ export class CustomiserComponent implements OnInit {
     edgeColor : '#999999',
     arrowColor : '#999999',
     nodeSize : 7,
-    linksWidth: 1
+    linksWidth: 2
   };
 
   @Input() inputStyleObj: any;

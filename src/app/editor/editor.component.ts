@@ -1,8 +1,9 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../global';
 import { GraphComponent } from '../graph/graph.component';
 import * as d3 from 'd3';
 import { ClrWizard } from '@clr/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-editor',
@@ -25,6 +26,7 @@ export class EditorComponent implements OnInit {
   tableData;
   dataColumns;
   fileError = false;
+  graphGenerationError = false;
   fileSuccess = false;
   centralityActive = true;
   customiserActive = false;
@@ -36,8 +38,11 @@ export class EditorComponent implements OnInit {
   showArrows: false;
   centralityTableData;
   showCentralityTable = false;
+  router: Router;
 
-  constructor() { }
+  constructor(router: Router) {
+    this.router = router;
+  }
 
   ngOnInit() {
     if (this.demoOptions) {
@@ -51,6 +56,10 @@ export class EditorComponent implements OnInit {
     this.options = this.data = this.dataValue = this.error = this.tableData =
       this.dataColumns = this.graphStyle = this.rootNodeValue = this.destNodeValue = this.centralityTableData = null;
     this.wizard.reset();
+  }
+
+  receivedGraphError(dataOk) {
+    this.graphGenerationError = dataOk !== true;
   }
 
   receivedTableData(data) {
@@ -76,7 +85,14 @@ export class EditorComponent implements OnInit {
   }
 
   uploadFile() {
+    this.error = null;
+    const extension = this.file.name.split('.').pop();
     const fileReader = new FileReader();
+    const extensions = ['csv', 'tsv', 'json'];
+    if (extensions.indexOf(extension) < 0) {
+      this.error = 'File format not supported!';
+      return;
+    }
     fileReader.onerror = (e) => {
       this.fileError = true;
       this.fileSuccess = false;
@@ -92,6 +108,9 @@ export class EditorComponent implements OnInit {
   }
 
   page1Handler(buttonType) {
+    if ('custom-danger' === buttonType) {
+      this.router.navigate(['/']);
+    }
     if ('custom-next' === buttonType) {
       if (!this.dataValue) {this.error = 'Missing or faulty data!'; return; }
       const extension = this.file.name.split('.').pop();
@@ -135,6 +154,10 @@ export class EditorComponent implements OnInit {
         showArrows: this.showArrows
       };
     }
+  }
+
+  wizardCancel() {
+    this.router.navigate(['/']);
   }
 
 }
