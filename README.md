@@ -5,4 +5,6 @@ Järgmiseks on vaja installeerida Angular CLI. Seda saab teha käsureal (termina
 Siis on vaja projekti kaustas(seal kus asub fail package.json) käivitada käsk "npm install" (installeerib vajalikud raamistikud ja teegid).
 Server läheb käima käsuga "ng serve" (kui lisada parameeter --open, siis avab rakenduse automaatselt brauseris, vastasel juhul on rakendus kättesaadav aadressil http://localhost:4200).
 
+Kui on vajadus graafi andmeid sisaldavate failide järel, siis on assets kaustas olemas autori poolt kasutatud testfailid.
+
 Veebirakendus on olemas töötaval kujul ka juba aadressil https://rasmussild.github.io/data-viz/
