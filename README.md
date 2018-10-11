@@ -1,5 +1,6 @@
 # data-viz
 
+Antud veebirakenduse näol on tegemist TTÜ bakalaureuseõppe lõputööga.
 Rakenduse tööle saamiseks lokaalselt on vaja esmalt installeerida NodeJS (LTS versioon), kättesaadav siit: https://nodejs.org/en/. Sellega tuleb kaasa käsurea käsk npm (node package manager). 
 Järgmiseks on vaja installeerida Angular CLI. Seda saab teha käsureal (terminalis) käsuga "npm install -g @angular/cli" (ilma jutumärkideta).
 Siis on vaja projekti kaustas(seal kus asub fail package.json) käivitada käsk "npm install" (installeerib vajalikud raamistikud ja teegid).
